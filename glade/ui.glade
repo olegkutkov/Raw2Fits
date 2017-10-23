@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.18.3 -->
+<!-- Generated with glade 3.16.1 -->
 <interface>
-  <requires lib="gtk+" version="3.12"/>
+  <requires lib="gtk+" version="3.8"/>
   <object class="GtkImage" id="about_img">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -43,6 +43,7 @@ for Canon/Nikon/Sony/Fuji cameras</property>
           <packing>
             <property name="expand">False</property>
             <property name="fill">False</property>
+            <property name="pack_type">end</property>
             <property name="position">0</property>
           </packing>
         </child>
@@ -116,13 +117,13 @@ for Canon/Nikon/Sony/Fuji cameras</property>
     </data>
   </object>
   <object class="GtkApplicationWindow" id="window_main">
+    <property name="width_request">450</property>
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">RAW to FITS converter</property>
     <property name="resizable">False</property>
-    <property name="default_width">560</property>
+    <property name="default_width">450</property>
     <property name="default_height">300</property>
     <property name="icon">raw2fits_48x48.png</property>
-    <property name="has_resize_grip">True</property>
     <signal name="destroy" handler="on_window_main_destroy" swapped="no"/>
     <child>
       <object class="GtkBox" id="box1">
@@ -133,6 +134,7 @@ for Canon/Nikon/Sony/Fuji cameras</property>
           <object class="GtkGrid" id="grid1">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="halign">start</property>
             <child>
               <object class="GtkBox" id="box2">
                 <property name="visible">True</property>
@@ -149,6 +151,7 @@ for Canon/Nikon/Sony/Fuji cameras</property>
                     <property name="margin_top">8</property>
                     <property name="margin_bottom">4</property>
                     <property name="image">dir_img1</property>
+                    <property name="always_show_image">True</property>
                     <signal name="clicked" handler="button_raw_dir_clicked_cb" swapped="no"/>
                   </object>
                   <packing>
@@ -168,6 +171,7 @@ for Canon/Nikon/Sony/Fuji cameras</property>
                     <property name="margin_top">4</property>
                     <property name="margin_bottom">8</property>
                     <property name="image">dir_img2</property>
+                    <property name="always_show_image">True</property>
                     <signal name="clicked" handler="button_out_dir_clicked_cb" swapped="no"/>
                   </object>
                   <packing>
@@ -180,6 +184,8 @@ for Canon/Nikon/Sony/Fuji cameras</property>
               <packing>
                 <property name="left_attach">0</property>
                 <property name="top_attach">0</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -223,6 +229,8 @@ for Canon/Nikon/Sony/Fuji cameras</property>
               <packing>
                 <property name="left_attach">1</property>
                 <property name="top_attach">0</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -232,18 +240,21 @@ for Canon/Nikon/Sony/Fuji cameras</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="margin_left">47</property>
-                <property name="margin_right">7</property>
+                <property name="halign">end</property>
+                <property name="margin_left">63</property>
                 <property name="margin_top">3</property>
                 <property name="margin_bottom">8</property>
                 <property name="image">about_img</property>
                 <property name="relief">none</property>
                 <property name="image_position">top</property>
+                <property name="always_show_image">True</property>
                 <signal name="clicked" handler="button_about_clicked_cb" swapped="no"/>
               </object>
               <packing>
                 <property name="left_attach">2</property>
                 <property name="top_attach">0</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
               </packing>
             </child>
           </object>
@@ -272,8 +283,9 @@ for Canon/Nikon/Sony/Fuji cameras</property>
           <object class="GtkLabel" id="label1">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="margin_left">4</property>
-            <property name="margin_right">391</property>
+            <property name="halign">start</property>
+            <property name="margin_left">6</property>
+            <property name="margin_right">322</property>
             <property name="margin_top">4</property>
             <property name="margin_bottom">4</property>
             <property name="label" translatable="yes">Fits header data</property>
@@ -291,6 +303,7 @@ for Canon/Nikon/Sony/Fuji cameras</property>
           <object class="GtkLabel" id="label2">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="halign">start</property>
             <property name="margin_left">6</property>
             <property name="margin_right">111</property>
             <property name="margin_top">1</property>
@@ -305,22 +318,26 @@ for Canon/Nikon/Sony/Fuji cameras</property>
         </child>
         <child>
           <object class="GtkGrid" id="grid2">
+            <property name="width_request">339</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="margin_left">2</property>
+            <property name="margin_right">2</property>
             <child>
               <object class="GtkLabel" id="label3">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="halign">start</property>
-                <property name="margin_left">35</property>
-                <property name="margin_right">5</property>
+                <property name="margin_left">6</property>
+                <property name="margin_right">40</property>
                 <property name="margin_bottom">8</property>
                 <property name="label" translatable="yes">Object:</property>
-                <property name="width_chars">9</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
                 <property name="top_attach">0</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -328,14 +345,16 @@ for Canon/Nikon/Sony/Fuji cameras</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="halign">start</property>
-                <property name="margin_left">16</property>
-                <property name="margin_right">12</property>
+                <property name="margin_left">10</property>
+                <property name="margin_right">10</property>
                 <property name="margin_bottom">8</property>
                 <property name="label" translatable="yes">Telescope:</property>
               </object>
               <packing>
                 <property name="left_attach">2</property>
                 <property name="top_attach">0</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -344,11 +363,13 @@ for Canon/Nikon/Sony/Fuji cameras</property>
                 <property name="can_focus">True</property>
                 <property name="margin_bottom">8</property>
                 <property name="max_length">71</property>
-                <property name="width_chars">19</property>
+                <property name="width_chars">23</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
                 <property name="top_attach">0</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -356,13 +377,16 @@ for Canon/Nikon/Sony/Fuji cameras</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="halign">start</property>
+                <property name="margin_right">24</property>
                 <property name="margin_bottom">8</property>
                 <property name="max_length">71</property>
-                <property name="width_chars">19</property>
+                <property name="width_chars">23</property>
               </object>
               <packing>
                 <property name="left_attach">3</property>
                 <property name="top_attach">0</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -370,26 +394,31 @@ for Canon/Nikon/Sony/Fuji cameras</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="halign">start</property>
-                <property name="margin_left">18</property>
+                <property name="margin_left">6</property>
                 <property name="margin_bottom">8</property>
                 <property name="label" translatable="yes">Instrument:</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
                 <property name="top_attach">1</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
               </packing>
             </child>
             <child>
               <object class="GtkLabel" id="label6">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_left">7</property>
+                <property name="halign">start</property>
+                <property name="margin_left">10</property>
                 <property name="margin_bottom">8</property>
                 <property name="label" translatable="yes">Observer:</property>
               </object>
               <packing>
                 <property name="left_attach">2</property>
                 <property name="top_attach">1</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -398,11 +427,13 @@ for Canon/Nikon/Sony/Fuji cameras</property>
                 <property name="can_focus">True</property>
                 <property name="margin_bottom">8</property>
                 <property name="max_length">71</property>
-                <property name="width_chars">19</property>
+                <property name="width_chars">23</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
                 <property name="top_attach">1</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -413,11 +444,13 @@ for Canon/Nikon/Sony/Fuji cameras</property>
                 <property name="margin_right">8</property>
                 <property name="margin_bottom">8</property>
                 <property name="max_length">71</property>
-                <property name="width_chars">19</property>
+                <property name="width_chars">23</property>
               </object>
               <packing>
                 <property name="left_attach">3</property>
                 <property name="top_attach">1</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -425,13 +458,15 @@ for Canon/Nikon/Sony/Fuji cameras</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="halign">start</property>
-                <property name="margin_left">57</property>
+                <property name="margin_left">6</property>
                 <property name="margin_bottom">8</property>
                 <property name="label" translatable="yes">Filter:</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
                 <property name="top_attach">2</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -440,24 +475,29 @@ for Canon/Nikon/Sony/Fuji cameras</property>
                 <property name="can_focus">True</property>
                 <property name="margin_bottom">8</property>
                 <property name="max_length">71</property>
-                <property name="width_chars">19</property>
+                <property name="width_chars">23</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
                 <property name="top_attach">2</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
               </packing>
             </child>
             <child>
               <object class="GtkLabel" id="label8">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_left">26</property>
+                <property name="halign">start</property>
+                <property name="margin_left">10</property>
                 <property name="margin_bottom">8</property>
                 <property name="label" translatable="yes">Notes:</property>
               </object>
               <packing>
                 <property name="left_attach">2</property>
                 <property name="top_attach">2</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -468,11 +508,13 @@ for Canon/Nikon/Sony/Fuji cameras</property>
                 <property name="margin_right">8</property>
                 <property name="margin_bottom">8</property>
                 <property name="max_length">71</property>
-                <property name="width_chars">19</property>
+                <property name="width_chars">23</property>
               </object>
               <packing>
                 <property name="left_attach">3</property>
                 <property name="top_attach">2</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -480,13 +522,15 @@ for Canon/Nikon/Sony/Fuji cameras</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="halign">start</property>
-                <property name="margin_left">28</property>
+                <property name="margin_left">6</property>
                 <property name="margin_bottom">8</property>
                 <property name="label" translatable="yes">Exposure:</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
                 <property name="top_attach">3</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -495,12 +539,14 @@ for Canon/Nikon/Sony/Fuji cameras</property>
                 <property name="can_focus">True</property>
                 <property name="margin_bottom">8</property>
                 <property name="max_length">71</property>
-                <property name="width_chars">19</property>
+                <property name="width_chars">23</property>
                 <property name="input_purpose">number</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
                 <property name="top_attach">3</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -508,13 +554,15 @@ for Canon/Nikon/Sony/Fuji cameras</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="halign">start</property>
-                <property name="margin_left">47</property>
+                <property name="margin_left">10</property>
                 <property name="margin_bottom">8</property>
                 <property name="label" translatable="yes">Date:</property>
               </object>
               <packing>
                 <property name="left_attach">2</property>
                 <property name="top_attach">3</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -524,11 +572,13 @@ for Canon/Nikon/Sony/Fuji cameras</property>
                 <property name="halign">start</property>
                 <property name="margin_bottom">8</property>
                 <property name="max_length">71</property>
-                <property name="width_chars">19</property>
+                <property name="width_chars">23</property>
               </object>
               <packing>
                 <property name="left_attach">3</property>
                 <property name="top_attach">3</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -543,6 +593,8 @@ for Canon/Nikon/Sony/Fuji cameras</property>
               <packing>
                 <property name="left_attach">0</property>
                 <property name="top_attach">4</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -552,11 +604,13 @@ for Canon/Nikon/Sony/Fuji cameras</property>
                 <property name="halign">start</property>
                 <property name="margin_bottom">8</property>
                 <property name="max_length">71</property>
-                <property name="width_chars">19</property>
+                <property name="width_chars">23</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
                 <property name="top_attach">4</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -591,8 +645,9 @@ for Canon/Nikon/Sony/Fuji cameras</property>
           <object class="GtkLabel" id="label12">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="margin_left">4</property>
-            <property name="margin_right">323</property>
+            <property name="halign">start</property>
+            <property name="margin_left">6</property>
+            <property name="margin_right">261</property>
             <property name="margin_top">3</property>
             <property name="margin_bottom">13</property>
             <property name="label" translatable="yes">Image &amp; color processing</property>
@@ -610,18 +665,21 @@ for Canon/Nikon/Sony/Fuji cameras</property>
           <object class="GtkGrid" id="grid3">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="halign">start</property>
             <child>
               <object class="GtkLabel" id="label13">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="halign">start</property>
-                <property name="margin_left">26</property>
+                <property name="margin_left">11</property>
                 <property name="margin_bottom">8</property>
                 <property name="label" translatable="yes">Color channels</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
                 <property name="top_attach">0</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -642,6 +700,8 @@ for Canon/Nikon/Sony/Fuji cameras</property>
               <packing>
                 <property name="left_attach">1</property>
                 <property name="top_attach">0</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
               </packing>
             </child>
           </object>
@@ -661,7 +721,7 @@ for Canon/Nikon/Sony/Fuji cameras</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
-                <property name="margin_left">25</property>
+                <property name="margin_left">11</property>
                 <property name="margin_top">8</property>
                 <property name="margin_bottom">8</property>
                 <property name="xalign">0</property>
@@ -670,6 +730,8 @@ for Canon/Nikon/Sony/Fuji cameras</property>
               <packing>
                 <property name="left_attach">0</property>
                 <property name="top_attach">0</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -688,6 +750,8 @@ for Canon/Nikon/Sony/Fuji cameras</property>
               <packing>
                 <property name="left_attach">1</property>
                 <property name="top_attach">0</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -705,6 +769,8 @@ for Canon/Nikon/Sony/Fuji cameras</property>
               <packing>
                 <property name="left_attach">2</property>
                 <property name="top_attach">0</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
               </packing>
             </child>
           </object>
@@ -733,7 +799,9 @@ for Canon/Nikon/Sony/Fuji cameras</property>
           <object class="GtkLabel" id="label14">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="margin_right">372</property>
+            <property name="halign">start</property>
+            <property name="margin_left">6</property>
+            <property name="margin_right">304</property>
             <property name="margin_top">3</property>
             <property name="margin_bottom">13</property>
             <property name="label" translatable="yes">Output properties</property>
@@ -756,13 +824,15 @@ for Canon/Nikon/Sony/Fuji cameras</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="halign">start</property>
-                <property name="margin_left">26</property>
+                <property name="margin_left">11</property>
                 <property name="margin_bottom">8</property>
                 <property name="label" translatable="yes">File naming</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
                 <property name="top_attach">0</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -785,6 +855,8 @@ for Canon/Nikon/Sony/Fuji cameras</property>
               <packing>
                 <property name="left_attach">1</property>
                 <property name="top_attach">0</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -802,6 +874,8 @@ for Canon/Nikon/Sony/Fuji cameras</property>
               <packing>
                 <property name="left_attach">2</property>
                 <property name="top_attach">0</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
               </packing>
             </child>
           </object>
@@ -853,10 +927,13 @@ for Canon/Nikon/Sony/Fuji cameras</property>
                 <property name="margin_top">4</property>
                 <property name="margin_bottom">8</property>
                 <property name="image">image_start</property>
+                <property name="always_show_image">True</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
                 <property name="top_attach">0</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -871,10 +948,13 @@ for Canon/Nikon/Sony/Fuji cameras</property>
                 <property name="margin_top">4</property>
                 <property name="margin_bottom">8</property>
                 <property name="image">image_stop</property>
+                <property name="always_show_image">True</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
                 <property name="top_attach">0</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
               </packing>
             </child>
             <child>
@@ -891,6 +971,8 @@ for Canon/Nikon/Sony/Fuji cameras</property>
               <packing>
                 <property name="left_attach">2</property>
                 <property name="top_attach">0</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
               </packing>
             </child>
           </object>
