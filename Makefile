@@ -1,7 +1,7 @@
 # change application name here (executable output name)
 
 CC := gcc 
-PROGRAM = cr2fits
+PROGRAM = raw2fits
 
 CFLAGS := -Wall -g -ggdb -pipe
 
