@@ -268,6 +268,9 @@ int main(int argc, char *argv[])
 	builder = gtk_builder_new();
 
 	if (!gtk_builder_add_from_file (builder, "/usr/share/raw2fits/ui.glade", &err)) {
+
+		err = NULL;
+
 		if (!gtk_builder_add_from_file (builder, "glade/ui.glade", &err)) {
 			show_error(err->message);
 			g_object_unref(builder);
