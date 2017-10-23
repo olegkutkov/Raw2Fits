@@ -245,6 +245,7 @@ void show_error(char *text) {
 
 int main(int argc, char *argv[])
 {
+	GError *err = NULL;
 	GtkBuilder *builder;
 	GtkWidget *window;
 	GtkWidget *about_window; 
@@ -266,9 +267,9 @@ int main(int argc, char *argv[])
 
 	builder = gtk_builder_new();
 
-	if (!gtk_builder_add_from_file (builder, "/usr/share/cr2fits/ui.glade", NULL)) {
-		if (!gtk_builder_add_from_file (builder, "glade/ui.glade", NULL)) {
-			show_error("Failed to load UI file cr2fits.ui!");
+	if (!gtk_builder_add_from_file (builder, "/usr/share/raw2fits/ui.glade", &err)) {
+		if (!gtk_builder_add_from_file (builder, "glade/ui.glade", &err)) {
+			show_error(err->message);
 			g_object_unref(builder);
 			return -1;
 		}
