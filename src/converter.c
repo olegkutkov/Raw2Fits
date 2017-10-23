@@ -11,12 +11,10 @@
 #include <fitsio.h>
 #include <libgen.h>
 #include "list.h"
-#include <pthread.h>
 #include <unistd.h>
 #include "converter.h"
 #include "file_utils.h"
-
-static pthread_t converter_thread;
+#include "thread_pool.h"
 
 typedef struct thread_arg {
 	list_node_t *filelist;
@@ -273,16 +271,26 @@ static void convert_one_file(char *file, void *arg)
 */
 }
 
+void *thread_func(void *arg)
+{
+	converter_params_t *params = (converter_params_t *)arg;
+
+	while (params->converter_run) {
+		printf("i am thread\n");
+		sleep(1);
+	}
+}
+
 void convert_files(converter_params_t *params)
 {
 	int file_count = 0;
 	DIR *dp;
 	struct dirent *ep;
 	list_node_t *file_list = NULL;
+	long int cpucnt;
+	int files_per_cpu_int, left_files;
 
-	params->logger_msg(params->logger_arg, "Reading directory ");
-	params->logger_msg(params->logger_arg, params->inpath);
-	params->logger_msg(params->logger_arg, "\n");
+	params->logger_msg(params->logger_arg, "Reading directory %s\n", params->inpath);
 
 	dp = opendir(params->inpath);
 
@@ -291,57 +299,70 @@ void convert_files(converter_params_t *params)
 	}
 
 	while ((ep = readdir(dp))) {
-		if ((strstr(ep->d_name, ".cr2") != NULL) || (strstr(ep->d_name, ".CR2") != NULL) || (strstr(ep->d_name, ".ARW") != NULL)) {
+		size_t inpath_len = strlen(params->inpath);
+		size_t fname_len = strlen(ep->d_name);
+		char *full_path = (char *) malloc(inpath_len + fname_len + 2);
 
-			size_t inpath_len = strlen(params->inpath);
-			size_t fname_len = strlen(ep->d_name);
-			char *full_path = (char *) malloc(inpath_len + fname_len + 2);
+		strncpy(full_path, params->inpath, inpath_len);
+		full_path[inpath_len] = '/';
+		strncpy(full_path + inpath_len + 1, ep->d_name, fname_len);
+		full_path[inpath_len + fname_len + 1] = '\0';
 
-			params->logger_msg(params->logger_arg, "\tFound file ");
-			params->logger_msg(params->logger_arg, ep->d_name);
-			params->logger_msg(params->logger_arg, "\n");
+		file_info_t finfo;
+		get_file_info(full_path, &finfo);
 
-			strncpy(full_path, params->inpath, inpath_len);
-			full_path[inpath_len] = '/';
-			strncpy(full_path + inpath_len + 1, ep->d_name, fname_len);
-			full_path[inpath_len + fname_len + 1] = '\0';
-
-			file_info_t finfo;
-
-			get_file_info(full_path, &finfo);
-
-			file_list = add_object_to_list(file_list, full_path);
-
+		if (!finfo.file_supported) {
 			free(full_path);
-
-			file_count++;
+			continue;
 		}
+
+		params->logger_msg(params->logger_arg, " Found %s raw file %s  size: %liK\n",
+							finfo.file_vendor, ep->d_name, finfo.file_size / 1024);
+	
+		file_list = add_object_to_list(file_list, full_path);
+
+		free(full_path);
+
+		file_count++;
 	}
 
 	closedir (dp);
 
 	if (file_count == 0) {
-		params->logger_msg(params->logger_arg, "Can't find RAW files, sorry\n\n");
+		params->logger_msg(params->logger_arg, "Can't find RAW files, sorry\n");
 		free_list(file_list);
 		return;
 	}
 
-	long int cpucnt = sysconf(_SC_NPROCESSORS_ONLN);
-	char cpu_num_str[4];
-	sprintf(cpu_num_str, "%li", cpucnt);
+	cpucnt = sysconf(_SC_NPROCESSORS_ONLN);
 
-	params->logger_msg(params->logger_arg, "\nStarting conveter on ");
-	params->logger_msg(params->logger_arg, cpu_num_str);
-	params->logger_msg(params->logger_arg, " processor cores...\n");
+	params->logger_msg(params->logger_arg, "\nStarting conveter on %li processor cores...\n", cpucnt);
 
-	int files_per_cpu_int = file_count / cpucnt;
-	int files_on_cpus_minus_one = files_per_cpu_int * (cpucnt - 1);
-	int files_lef_for_last_core = file_count - files_on_cpus_minus_one;
+	if (cpucnt > file_count) {
+		files_per_cpu_int = 1;
+		left_files = 0;
+	} else {
+		files_per_cpu_int = file_count / cpucnt;
+		left_files = file_count % cpucnt;
+	}
 
-	printf("files per cpu: %i  files_on_cpus_minus_one: %i\n", files_per_cpu_int, files_on_cpus_minus_one);
-	printf("files_lef_for_last_core: %i\n", files_lef_for_last_core);
+	printf("Files per cpu %i, left files: %i\n", files_per_cpu_int, left_files);
+
+	init_thread_pool(cpucnt);
+
+	int i = 0;
+
+	for (i; i < cpucnt; i++) {
+		thread_pool_add_task(thread_func, params);
+	}
+
+//	int files_on_cpus_minus_one = files_per_cpu_int * (cpucnt - 1);
+//	int files_lef_for_last_core = file_count - files_on_cpus_minus_one;
+
+//	printf("files per cpu: %i  files_on_cpus_minus_one: %i\n", files_per_cpu_int, files_on_cpus_minus_one);
+//	printf("files_lef_for_last_core: %i\n", files_lef_for_last_core);
 	
-	printf("simple: %i\n", (file_count % cpucnt));
+//	printf("simple: %li\n", (file_count % cpucnt));
 
 //	thread_arg_t th_arg;
 
@@ -353,65 +374,11 @@ void convert_files(converter_params_t *params)
 //	file_list = NULL;
 }
 
-/*void convert_files(char *inpath, char *outpath)
+void converter_stop(converter_params_t *params)
 {
-	int file_count = 0;
-	DIR *dp;
-	struct dirent *ep;
-	list_node_t *file_list = NULL;
+	params->converter_run = 0;
 
-	dp = opendir (inpath);
-
-	if (dp == NULL) {
-		return;
-	}
-
-	while ((ep = readdir(dp))) {
-		if ((strstr(ep->d_name, ".cr2") != NULL) || (strstr(ep->d_name, ".CR2") != NULL) || (strstr(ep->d_name, ".ARW") != NULL)) {
-
-			size_t inpath_len = strlen(inpath);
-			size_t fname_len = strlen(ep->d_name);
-			char *full_path = (char *) malloc(inpath_len + fname_len + 2);
-
-			strncpy(full_path, inpath, inpath_len);
-			full_path[inpath_len] = '/';
-			strncpy(full_path + inpath_len + 1, ep->d_name, fname_len);
-			full_path[inpath_len + fname_len + 1] = '\0';
-
-			file_list = add_object_to_list(file_list, full_path);
-
-			free(full_path);
-
-			file_count++;
-		}
-	}
-
-	closedir (dp);
-
-	if (file_count == 0) {
-		free_list(file_list);
-		return;
-	}
-
-	conv_cb_arg_t cb_arg;
-	file_metadata_t metadata;
-
-	metadata.bitpixel = 8;
-	metadata.exptime = 30.0;
-
-	strcpy(metadata.object, "M13");
-	strcpy(metadata.telescope, "150 mm newton");
-	strcpy(metadata.instrument, "Canon 600d");
-	strcpy(metadata.observer, "Kutkov");
-	strcpy(metadata.filter, "V");
-	strcpy(metadata.note, "Moon");
-
-	cb_arg.outdir = outpath;
-	cb_arg.meta = &metadata;
-
-	iterate_list_cb(file_list, &convert_one_file, &cb_arg);
-
-	free_list(file_list);
-	file_list = NULL;
-}*/
+	thread_pool_stop_tasks();
+	cleanup_thread_pool();
+}
 
