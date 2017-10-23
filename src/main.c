@@ -236,6 +236,7 @@ void show_error(char *text) {
 		GTK_DIALOG_MODAL,
 		GTK_MESSAGE_ERROR,
 		GTK_BUTTONS_OK,
+		"%s",
 		text);
 
 	gtk_window_set_title(GTK_WINDOW(dialog), "Error");
