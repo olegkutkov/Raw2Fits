@@ -236,7 +236,6 @@ for Canon/Nikon/Sony/Fuji cameras</property>
             <child>
               <object class="GtkButton" id="button_about">
                 <property name="label" translatable="yes">About</property>
-                <property name="related_action"/>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -328,7 +327,7 @@ for Canon/Nikon/Sony/Fuji cameras</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="halign">start</property>
-                <property name="margin_left">6</property>
+                <property name="margin_left">11</property>
                 <property name="margin_right">40</property>
                 <property name="margin_bottom">8</property>
                 <property name="label" translatable="yes">Object:</property>
@@ -394,7 +393,7 @@ for Canon/Nikon/Sony/Fuji cameras</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="halign">start</property>
-                <property name="margin_left">6</property>
+                <property name="margin_left">11</property>
                 <property name="margin_bottom">8</property>
                 <property name="label" translatable="yes">Instrument:</property>
               </object>
@@ -458,7 +457,7 @@ for Canon/Nikon/Sony/Fuji cameras</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="halign">start</property>
-                <property name="margin_left">6</property>
+                <property name="margin_left">11</property>
                 <property name="margin_bottom">8</property>
                 <property name="label" translatable="yes">Filter:</property>
               </object>
@@ -522,7 +521,7 @@ for Canon/Nikon/Sony/Fuji cameras</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="halign">start</property>
-                <property name="margin_left">6</property>
+                <property name="margin_left">11</property>
                 <property name="margin_bottom">8</property>
                 <property name="label" translatable="yes">Exposure:</property>
               </object>
@@ -586,7 +585,7 @@ for Canon/Nikon/Sony/Fuji cameras</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="halign">start</property>
-                <property name="margin_left">6</property>
+                <property name="margin_left">11</property>
                 <property name="margin_bottom">8</property>
                 <property name="label" translatable="yes">Temperature:</property>
               </object>
