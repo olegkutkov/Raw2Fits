@@ -5,6 +5,7 @@
 #include <gtk/gtk.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include "converter.h"
 
 static char *RAW_PATH = NULL;
@@ -37,6 +38,11 @@ typedef struct conv_start_argument {
 	GtkProgressBar *progrbar;
 	GtkTextView *textview;
 } conv_start_argument_t;
+
+typedef struct conv_stop_argument {
+	GtkButton *start_button;
+	converter_params_t *conv_params;
+} conv_stop_argument_t;
 
 void select_directory(char *dlg_title, dialog_argument_t *arg)
 {
@@ -96,21 +102,25 @@ void progress_update(void *arg)
 	
 }
 
-void logger_msg(void *arg, char *txt)
+void logger_msg(void *arg, char *fmt, ...)
 {
 	GtkTextBuffer *buffer;
 	GtkTextMark *mark;
 	GtkTextIter iter;
 
+	char buf[256] = { 0 };
+	va_list args;
+
 	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (arg));
 	mark = gtk_text_buffer_get_insert (buffer);
 	gtk_text_buffer_get_iter_at_mark (buffer, &iter, mark);
 
-//	if (gtk_text_buffer_get_char_count(buffer)) {
-//		gtk_text_buffer_insert (buffer, &iter, "\n", 1);
-//	}
+	va_start(args, fmt);
+	vsnprintf(buf, 256, fmt, args);
 
-	gtk_text_buffer_insert (buffer, &iter, txt, -1);
+	gtk_text_buffer_insert (buffer, &iter, buf, -1);
+
+	va_end(args);
 
 	gtk_text_view_scroll_to_mark(GTK_TEXT_VIEW(arg), gtk_text_buffer_get_insert(buffer), 0.0, TRUE, 0.5, 0.5);
 }
@@ -121,7 +131,12 @@ void button_convert_clicked_cb(GtkButton *button, conv_start_argument_t *arg)
 		return;
 	}
 
+	gtk_widget_set_sensitive(GTK_WIDGET(button), FALSE);
+	gtk_widget_set_sensitive(GTK_WIDGET(arg->stop_button), TRUE);
+
 	converter_params_t *conv_params = &arg->conv_params;
+
+	conv_params->converter_run = 1;
 
 	const char *entry_object_text = gtk_entry_get_text(arg->entry_object);
 	memset(conv_params->meta.object, 0, sizeof(conv_params->meta.object));
@@ -168,8 +183,16 @@ void button_convert_clicked_cb(GtkButton *button, conv_start_argument_t *arg)
 	conv_params->logger_msg = &logger_msg;
 
 	convert_files(conv_params);
+}
 
-	//convert_files(RAW_PATH, OUT_PATH);
+void button_convert_stop_clicked_cb(GtkButton *button, conv_stop_argument_t *arg)
+{
+	gtk_widget_set_sensitive(GTK_WIDGET(button), FALSE);
+	gtk_widget_set_sensitive(GTK_WIDGET(arg->start_button), TRUE);
+
+	converter_params_t *conv_params = arg->conv_params;
+
+	converter_stop(conv_params);
 }
 
 //void on_dialog_response
@@ -231,11 +254,13 @@ int main(int argc, char *argv[])
 	GtkWidget *button_output_dir;
 	GtkWidget *button_convert;
 	GtkWidget *button_about;
+	GtkWidget *button_stop;
 
 	dialog_argument_t cr2_dlg_userdata;
 	dialog_argument_t out_dlg_userdata;
 	about_dialog_argument_t about_dlg_userdata;
 	conv_start_argument_t conv_arg;
+	conv_stop_argument_t conv_stop_arg;
 
 	gtk_init(&argc, &argv);
 
@@ -257,6 +282,7 @@ int main(int argc, char *argv[])
 	button_raw_dir = GTK_WIDGET(gtk_builder_get_object(builder, "button_raw_dir"));
 	button_output_dir = GTK_WIDGET(gtk_builder_get_object(builder, "button_output_dir"));
 	button_convert = GTK_WIDGET(gtk_builder_get_object(builder, "button_convert"));
+	button_stop = GTK_WIDGET(gtk_builder_get_object(builder, "button_convert_stop"));
 	button_about = GTK_WIDGET(gtk_builder_get_object(builder, "button_about"));
 
 	conv_arg.entry_object = GTK_ENTRY(gtk_builder_get_object(builder, "entry_object"));
@@ -270,8 +296,11 @@ int main(int argc, char *argv[])
 	conv_arg.entry_date = GTK_ENTRY(gtk_builder_get_object(builder, "entry_date"));
 
 	conv_arg.progrbar = GTK_PROGRESS_BAR(gtk_builder_get_object(builder, "conv_progressbar"));
-
 	conv_arg.textview = GTK_TEXT_VIEW(gtk_builder_get_object(builder, "conv_log"));
+	conv_arg.stop_button = GTK_BUTTON(button_stop);
+
+	conv_stop_arg.start_button = GTK_BUTTON(button_convert);
+	conv_stop_arg.conv_params = &conv_arg.conv_params;
 ///
 
 	cr2_dlg_userdata.main_window = (GtkWindow*)window;
@@ -286,6 +315,7 @@ int main(int argc, char *argv[])
 	g_signal_connect(button_raw_dir, "clicked", G_CALLBACK (button_raw_dir_clicked_cb), &cr2_dlg_userdata);
 	g_signal_connect(button_output_dir, "clicked", G_CALLBACK (button_out_dir_clicked_cb), &out_dlg_userdata);
 	g_signal_connect(button_convert, "clicked", G_CALLBACK (button_convert_clicked_cb), &conv_arg);
+	g_signal_connect(button_stop, "clicked", G_CALLBACK (button_convert_stop_clicked_cb), &conv_stop_arg);
 
 	about_dlg_userdata.main_window = GTK_WINDOW(window);
 	about_dlg_userdata.dlg = GTK_DIALOG(about_window);
@@ -296,6 +326,8 @@ int main(int argc, char *argv[])
 
 	gtk_widget_show(window);                
 	gtk_main();
+
+	converter_stop(conv_stop_arg.conv_params);
 
 	return 0;
 }
