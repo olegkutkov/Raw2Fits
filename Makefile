@@ -9,7 +9,7 @@ GTKLIB=`pkg-config --cflags --libs gtk+-3.0`
 
 LDFLAG := $(GTKLIB) -lraw -lm -lcfitsio -export-dynamic -pthread
 
-SRC := src/main.c src/converter.c src/list.c src/file_utils.c
+SRC := src/main.c src/converter.c src/list.c src/file_utils.c src/thread_pool.c
 
 all: $(PROGRAM)
 
