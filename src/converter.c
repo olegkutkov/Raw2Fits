@@ -288,7 +288,7 @@ void convert_files(converter_params_t *params)
 	struct dirent *ep;
 	list_node_t *file_list = NULL;
 	long int cpucnt;
-	int files_per_cpu_int, left_files;
+	int files_per_cpu_int, left_files, i;
 
 	params->logger_msg(params->logger_arg, "Reading directory %s\n", params->inpath);
 
@@ -350,9 +350,7 @@ void convert_files(converter_params_t *params)
 
 	init_thread_pool(cpucnt);
 
-	int i = 0;
-
-	for (i; i < cpucnt; i++) {
+	for (i = 0; i < cpucnt; i++) {
 		thread_pool_add_task(thread_func, params);
 	}
 
