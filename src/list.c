@@ -40,12 +40,23 @@ void free_list(list_node_t *list)
 	}
 }
 
-void iterate_list_cb(list_node_t *list, iterate_cb cb, void* arg)
+void iterate_list_cb(list_node_t *list, iterate_cb cb, void* arg, int offset, int count, int *sflag)
 {
+	int curr_offset = 0;
 	list_node_t *tmp;
 
 	for (tmp = list; tmp; tmp = tmp->next) {
-		(*cb) (tmp->object, arg);
+		if (!*sflag) {
+			break;
+		}
+
+		if (curr_offset >= offset) {
+			if (curr_offset == count) {
+				break;
+			}
+
+			(*cb) (tmp->object, arg);
+		}
 	}
 }
 
