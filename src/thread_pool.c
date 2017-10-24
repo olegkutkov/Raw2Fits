@@ -30,8 +30,7 @@ void thread_pool_stop_tasks()
 	int i;
 
 	for (i = 0; i < total_threads; i++) {
-		pthread_t wthread = threads[i];
-		pthread_join(wthread, NULL);
+		pthread_join(threads[i], NULL);
 	}
 }
 
