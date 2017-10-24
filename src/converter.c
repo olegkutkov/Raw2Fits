@@ -24,18 +24,20 @@ typedef struct thread_arg {
 
 void *thread_func(void *arg)
 {
-	int i;
 	thread_arg_t *th_arg = (thread_arg_t *) arg;
 	converter_params_t *params = th_arg->conv_param;
 
-	for (i = 0; i < th_arg->file_list_len; i++) {
-		if (!params->converter_run) {
-			return NULL;
-		}
+	printf("file_list_offset %i  file_list_len %i\n", th_arg->file_list_offset, th_arg->file_list_len);
 
-		sleep(3);
-		params->progress.progr_update(&params->progress);
-	}
+//	iterate_list_cb(th_arg->filelist, );
+
+//	for (i = 0; i < th_arg->file_list_len; i++) {
+//		if (!params->converter_run) {
+//			return NULL;
+//		}
+//
+//		params->progress.progr_update(&params->progress);
+//	}
 
 	return NULL;
 }
@@ -48,6 +50,7 @@ void convert_files(converter_params_t *params)
 	list_node_t *file_list = NULL;
 	long int cpucnt;
 	int files_per_cpu_int, left_files, i;
+	int file_list_offset_next = 0;
 	thread_arg_t thread_params;
 
 	params->logger_msg(params->logger_arg, "Reading directory %s\n", params->inpath);
@@ -115,9 +118,9 @@ void convert_files(converter_params_t *params)
 
 	thread_params.conv_param = params;
 	thread_params.filelist = file_list;
-
+	
 	for (i = 0; i < cpucnt; i++) {
-		thread_params.file_list_offset = files_per_cpu_int + 1;
+		thread_params.file_list_offset = file_list_offset_next;
 		thread_params.file_list_len = files_per_cpu_int;
 
 		if (i == cpucnt - 1) {
@@ -125,6 +128,8 @@ void convert_files(converter_params_t *params)
 		}
  
 		thread_pool_add_task(thread_func, &thread_params);
+
+		file_list_offset_next += files_per_cpu_int;
 	}
 
 	free_list(file_list);
