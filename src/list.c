@@ -40,7 +40,7 @@ void free_list(list_node_t *list)
 	}
 }
 
-void iterate_list_cb(list_node_t *list, iterate_cb cb, void* arg, int offset, int count, int *sflag)
+void iterate_list_cb(list_node_t *list, iterate_cb cb, void* arg, int offset, int count, char *sflag)
 {
 	int curr_offset = 0;
 	list_node_t *tmp;
