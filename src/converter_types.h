@@ -41,8 +41,17 @@ typedef struct file_setup {
 	char overwrite;
 } file_setup_t;
 
-typedef void (*progress_setup_cb) (int, void*);
+typedef void (*progress_setup_cb) (void*, int);
 typedef void (*progress_update_cb) (void*);
+
+typedef struct progress_params {
+	void *progr_arg;
+	progress_setup_cb progr_setup;
+	progress_update_cb progr_update;
+	int max_value;
+	int current_value;
+} progress_params_t;
+
 typedef void (*logger_msg_cb) (void*, char*, ...);
 typedef void (*done_cb) (void);
 
@@ -53,9 +62,7 @@ typedef struct converter_params {
 	file_metadata_t meta;
 	image_setup_t imsetup;
 	file_setup_t fsetup;
-	void *progr_arg;
-	progress_setup_cb progr_setup;
-	progress_update_cb progr_update;
+	progress_params_t progress;
 	void *logger_arg;
 	logger_msg_cb logger_msg;
 	done_cb complete;

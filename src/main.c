@@ -91,15 +91,43 @@ void button_out_dir_clicked_cb(GtkButton *button, dialog_argument_t *arg)
 	}
 }
 
-
-void progress_setup(int max_val, void *arg)
+void progress_setup(void *arg, int max_val)
 {
-	
+	progress_params_t *progr = (progress_params_t*) arg;
+	GtkProgressBar *pbar = GTK_PROGRESS_BAR(progr->progr_arg);
+
+	gtk_progress_bar_set_fraction(pbar, 0.0);
+
+	progr->max_value = max_val;
+	progr->current_value = 0;
 }
 
 void progress_update(void *arg)
 {
-	
+	int pct;
+	gfloat pval = 0;
+	progress_params_t *progr = (progress_params_t*) arg;
+	GtkProgressBar *pbar = GTK_PROGRESS_BAR(progr->progr_arg);
+	gdouble fraction = gtk_progress_bar_get_fraction(pbar);
+
+	printf("fraction %f\n", fraction);
+
+	fraction += 0.1;
+
+	gtk_progress_bar_set_fraction(pbar, fraction);
+
+
+//	progr->current_value++;
+
+//	pval = (gfloat) progr->current_value / (gfloat) progr->max_value;
+
+//	pct = pval * 100;
+
+//	gtk_progress_set_percentage(progr, pval);
+
+	while (gtk_events_pending ()) {
+		gtk_main_iteration();
+	}
 }
 
 void logger_msg(void *arg, char *fmt, ...)
@@ -175,9 +203,9 @@ void button_convert_clicked_cb(GtkButton *button, conv_start_argument_t *arg)
 	memset(conv_params->outpath, 0, sizeof(conv_params->outpath));
 	strncpy(conv_params->outpath, OUT_PATH, strlen(OUT_PATH));
 
-	conv_params->progr_arg = (void *) arg->progrbar;
-	conv_params->progr_setup = &progress_setup;
-	conv_params->progr_update = &progress_update;
+	conv_params->progress.progr_arg = (void *) arg->progrbar;
+	conv_params->progress.progr_setup = &progress_setup;
+	conv_params->progress.progr_update = &progress_update;
 
 	conv_params->logger_arg = (void *) arg->textview;
 	conv_params->logger_msg = &logger_msg;
@@ -301,6 +329,9 @@ int main(int argc, char *argv[])
 	conv_arg.entry_date = GTK_ENTRY(gtk_builder_get_object(builder, "entry_date"));
 
 	conv_arg.progrbar = GTK_PROGRESS_BAR(gtk_builder_get_object(builder, "conv_progressbar"));
+
+	gtk_progress_bar_set_fraction (conv_arg.progrbar, 0.0);
+
 	conv_arg.textview = GTK_TEXT_VIEW(gtk_builder_get_object(builder, "conv_log"));
 	conv_arg.stop_button = GTK_BUTTON(button_stop);
 

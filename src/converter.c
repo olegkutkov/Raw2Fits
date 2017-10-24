@@ -334,9 +334,16 @@ void convert_files(converter_params_t *params)
 		return;
 	}
 
+	params->progress.progr_setup(&params->progress, file_count);
+
 	cpucnt = sysconf(_SC_NPROCESSORS_ONLN);
 
 	params->logger_msg(params->logger_arg, "\nStarting conveter on %li processor cores...\n", cpucnt);
+
+	for (i = 0; i < file_count; i++) {
+		params->progress.progr_update(&params->progress);
+		sleep(2);
+	}
 
 	if (cpucnt > file_count) {
 		files_per_cpu_int = 1;
