@@ -48,7 +48,7 @@ typedef struct progress_params {
 	void *progr_arg;
 	progress_setup_cb progr_setup;
 	progress_update_cb progr_update;
-	int max_value;
+	float fraction;
 	int current_value;
 } progress_params_t;
 
