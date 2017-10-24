@@ -348,7 +348,7 @@ for Canon/Nikon/Sony/Fuji cameras</property>
                 <property name="can_focus">False</property>
                 <property name="halign">start</property>
                 <property name="margin_left">11</property>
-                <property name="margin_right">40</property>
+                <property name="margin_right">44</property>
                 <property name="margin_bottom">8</property>
                 <property name="label" translatable="yes">Object:</property>
               </object>
@@ -860,6 +860,7 @@ for Canon/Nikon/Sony/Fuji cameras</property>
             <property name="margin_left">2</property>
             <property name="margin_right">2</property>
             <property name="margin_bottom">6</property>
+            <property name="vscrollbar_policy">always</property>
             <property name="shadow_type">in</property>
             <child>
               <object class="GtkTextView" id="conv_log">
@@ -929,6 +930,7 @@ for Canon/Nikon/Sony/Fuji cameras</property>
                 <property name="margin_top">6</property>
                 <property name="margin_bottom">18</property>
                 <property name="hexpand">True</property>
+                <property name="pulse_step">0</property>
                 <property name="show_text">True</property>
               </object>
               <packing>
