@@ -24,6 +24,15 @@ typedef struct thread_arg {
 	int file_list_len;
 } thread_arg_t;
 
+void convert_one_file(char *file, void *arg)
+{
+	converter_params_t *params = (converter_params_t *) arg;
+
+	printf("convert_one_file from thread, file: %s\n", file);
+
+	params->progress.progr_update(&params->progress);
+}
+
 void *thread_func(void *arg)
 {
 	thread_arg_t th_arg_local;
@@ -36,17 +45,7 @@ void *thread_func(void *arg)
 
 	params = th_arg_local.conv_param;
 
-	printf("file_list_offset %i  file_list_len %i\n", th_arg->file_list_offset, th_arg->file_list_len);
-
-//	iterate_list_cb(th_arg->filelist, );
-
-//	for (i = 0; i < th_arg->file_list_len; i++) {
-//		if (!params->converter_run) {
-//			return NULL;
-//		}
-//
-//		params->progress.progr_update(&params->progress);
-//	}
+	iterate_list_cb(th_arg_local.filelist, &convert_one_file, params, th_arg_local.file_list_offset, th_arg_local.file_list_len, &params->converter_run);
 
 	return NULL;
 }
