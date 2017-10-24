@@ -15,6 +15,8 @@
 #include "file_utils.h"
 #include "thread_pool.h"
 
+static list_node_t *file_list = NULL;
+
 typedef struct thread_arg {
 	converter_params_t *conv_param;
 	list_node_t *filelist;
@@ -54,7 +56,6 @@ void convert_files(converter_params_t *params)
 	int file_count = 0;
 	DIR *dp;
 	struct dirent *ep;
-	list_node_t *file_list = NULL;
 	long int cpucnt;
 	int files_per_cpu_int, left_files, i;
 	int file_list_offset_next = 0;
@@ -140,9 +141,6 @@ void convert_files(converter_params_t *params)
 
 		file_list_offset_next += files_per_cpu_int;
 	}
-
-	free_list(file_list);
-	file_list = NULL;
 }
 
 void converter_stop(converter_params_t *params)
@@ -151,5 +149,10 @@ void converter_stop(converter_params_t *params)
 
 	thread_pool_stop_tasks();
 	cleanup_thread_pool();
+
+	if (file_list) {
+		free_list(file_list);
+		file_list = NULL;
+	}
 }
 
