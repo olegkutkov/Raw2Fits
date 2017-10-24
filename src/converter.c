@@ -28,7 +28,7 @@ void convert_one_file(char *file, void *arg)
 {
 	converter_params_t *params = (converter_params_t *) arg;
 
-	printf("convert_one_file from thread, file: %s\n", file);
+	params->logger_msg(params->logger_arg, "Converting %s\n", file);
 
 	params->progress.progr_update(&params->progress);
 }
