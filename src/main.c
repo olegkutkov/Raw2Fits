@@ -98,32 +98,20 @@ void progress_setup(void *arg, int max_val)
 
 	gtk_progress_bar_set_fraction(pbar, 0.0);
 
-	progr->max_value = max_val;
+	progr->fraction = 1.0 / max_val;
 	progr->current_value = 0;
 }
 
 void progress_update(void *arg)
 {
-	int pct;
-	gfloat pval = 0;
 	progress_params_t *progr = (progress_params_t*) arg;
 	GtkProgressBar *pbar = GTK_PROGRESS_BAR(progr->progr_arg);
+
 	gdouble fraction = gtk_progress_bar_get_fraction(pbar);
 
-	printf("fraction %f\n", fraction);
-
-	fraction += 0.1;
+	fraction += progr->fraction;
 
 	gtk_progress_bar_set_fraction(pbar, fraction);
-
-
-//	progr->current_value++;
-
-//	pval = (gfloat) progr->current_value / (gfloat) progr->max_value;
-
-//	pct = pval * 100;
-
-//	gtk_progress_set_percentage(progr, pval);
 
 	while (gtk_events_pending ()) {
 		gtk_main_iteration();
