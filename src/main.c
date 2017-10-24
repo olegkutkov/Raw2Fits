@@ -11,6 +11,8 @@
 static char *RAW_PATH = NULL;
 static char *OUT_PATH = NULL;
 
+static GMutex progress_bar_mutex;
+
 typedef struct dialog_argument {
 	GtkWindow *main_window;
 	GtkWidget *text_label;
@@ -104,6 +106,8 @@ void progress_setup(void *arg, int max_val)
 
 void progress_update(void *arg)
 {
+	g_mutex_lock(&progress_bar_mutex);
+
 	progress_params_t *progr = (progress_params_t*) arg;
 	GtkProgressBar *pbar = GTK_PROGRESS_BAR(progr->progr_arg);
 
@@ -112,6 +116,8 @@ void progress_update(void *arg)
 	fraction += progr->fraction;
 
 	gtk_progress_bar_set_fraction(pbar, fraction);
+
+	g_mutex_unlock(&progress_bar_mutex);
 
 	while (gtk_events_pending ()) {
 		gtk_main_iteration();
@@ -124,21 +130,22 @@ void logger_msg(void *arg, char *fmt, ...)
 	GtkTextMark *mark;
 	GtkTextIter iter;
 
-	char buf[256] = { 0 };
+	char buf[256];
+
 	va_list args;
+
+	va_start(args, fmt);
+	vsnprintf(buf, 256, fmt, args);
+	va_end(args);
+
+	buf[255] = '\0';
 
 	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (arg));
 	mark = gtk_text_buffer_get_insert (buffer);
 	gtk_text_buffer_get_iter_at_mark (buffer, &iter, mark);
+	gtk_text_buffer_insert(buffer, &iter, buf, -1);
 
-	va_start(args, fmt);
-	vsnprintf(buf, 256, fmt, args);
-
-	gtk_text_buffer_insert (buffer, &iter, buf, -1);
-
-	va_end(args);
-
-	gtk_text_view_scroll_to_mark(GTK_TEXT_VIEW(arg), gtk_text_buffer_get_insert(buffer), 0.0, TRUE, 0.5, 0.5);
+	gtk_text_view_scroll_to_mark(GTK_TEXT_VIEW(arg), gtk_text_buffer_get_insert(buffer), 0.0, FALSE, 0.5, 0.5);
 }
 
 void button_convert_clicked_cb(GtkButton *button, conv_start_argument_t *arg)
@@ -348,10 +355,14 @@ int main(int argc, char *argv[])
 
 	g_object_unref(builder);
 
+	g_mutex_init(&progress_bar_mutex);
+
 	gtk_widget_show(window);                
 	gtk_main();
 
 	converter_stop(conv_stop_arg.conv_params);
+
+	g_mutex_clear(&progress_bar_mutex);
 
 	return 0;
 }
