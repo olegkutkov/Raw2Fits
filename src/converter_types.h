@@ -4,11 +4,11 @@
 
 typedef enum frame_mode {
 	GRAYSCALE = 0,
-	RED_ONLY,
-	BLUE_ONLY,
-	GREEN_ONLY,
+	ALL_CHANNELS_BY_FILES,
 	ALL_CHANNELS,
-	ALL_CHANNELS_BY_FILES
+	RED_ONLY,
+	GREEN_ONLY,
+	BLUE_ONLY
 } FRAME_MODE;
 
 typedef enum file_naming {
