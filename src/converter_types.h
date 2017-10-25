@@ -1,4 +1,7 @@
 
+#ifndef __CONVERTER_TYPES_H__
+#define __CONVERTER_TYPES_H__
+
 typedef enum frame_mode {
 	GRAYSCALE = 0,
 	RED_ONLY,
@@ -67,4 +70,6 @@ typedef struct converter_params {
 	logger_msg_cb logger_msg;
 	done_cb complete;
 } converter_params_t;
+
+#endif
 

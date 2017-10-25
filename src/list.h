@@ -2,6 +2,9 @@
  *
  */
 
+#ifndef __LIST_H__
+#define __LIST_H__
+
 typedef struct node {
     char *object;
     struct node *next;
@@ -12,4 +15,6 @@ typedef void (*iterate_cb)(char*, void*);
 list_node_t *add_object_to_list(list_node_t *list, char *object);
 void free_list(list_node_t *list);
 void iterate_list_cb(list_node_t *list, iterate_cb cb, void* arg, int offset, int count, char *sflag);
+
+#endif
 

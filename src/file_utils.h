@@ -1,4 +1,7 @@
 
+#ifndef __FILE_UTILS_H__
+#define __FILE_UTILS_H__
+
 #include <stdint.h>
 
 typedef struct file_info {
@@ -9,4 +12,7 @@ typedef struct file_info {
 
 void get_file_info(char *fname, file_info_t *finf);
 long get_file_size(char *fname);
+int is_file_exist(char *filename);
+
+#endif
 
