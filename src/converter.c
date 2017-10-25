@@ -8,6 +8,7 @@
 #include "converter.h"
 #include "file_utils.h"
 #include "thread_pool.h"
+#include "raw2fits.h"
 
 static list_node_t *file_list = NULL;
 
@@ -22,7 +23,9 @@ void convert_one_file(char *file, void *arg)
 {
 	converter_params_t *params = (converter_params_t *) arg;
 
-	params->logger_msg(params->logger_arg, "Converting %s\n", file);
+	params->logger_msg(params->logger_arg, "\nConverting %s\n", file);
+
+	raw2fits(file, params);
 
 	params->progress.progr_update(&params->progress);
 }
@@ -40,8 +43,6 @@ void *thread_func(void *arg)
 	params = th_arg_local.conv_param;
 
 	iterate_list_cb(th_arg_local.filelist, &convert_one_file, params, th_arg_local.file_list_offset, th_arg_local.file_list_len, &params->converter_run);
-
-	params->logger_msg(params->logger_arg, "Thread done\n");
 
 	return NULL;
 }
