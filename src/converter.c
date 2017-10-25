@@ -23,7 +23,7 @@ void convert_one_file(char *file, void *arg)
 {
 	converter_params_t *params = (converter_params_t *) arg;
 
-	params->logger_msg(params->logger_arg, "\nConverting %s\n", file);
+	params->logger_msg(params->logger_arg, "\nWorking %s\n", file);
 
 	raw2fits(file, params);
 
