@@ -2,7 +2,9 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #include "file_utils.h"
 
 struct file_vendors {
@@ -85,4 +87,12 @@ long get_file_size(char *fname)
 
 	return statbuf.st_size;
 }
+
+int is_file_exist(char *filename)
+{
+	struct stat buffer;
+	return (stat (filename, &buffer) == 0);
+}
+
+
 
