@@ -1,16 +1,10 @@
 ////
 
-#include <stdio.h>
 #include <stdlib.h>
-#include <sys/types.h>
 #include <dirent.h>
 #include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <unistd.h>
-#include <libgen.h>
 #include "list.h"
-#include <unistd.h>
 #include "converter.h"
 #include "file_utils.h"
 #include "thread_pool.h"
@@ -46,6 +40,8 @@ void *thread_func(void *arg)
 	params = th_arg_local.conv_param;
 
 	iterate_list_cb(th_arg_local.filelist, &convert_one_file, params, th_arg_local.file_list_offset, th_arg_local.file_list_len, &params->converter_run);
+
+	params->logger_msg(params->logger_arg, "Thread done\n");
 
 	return NULL;
 }
