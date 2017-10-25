@@ -46,6 +46,8 @@ typedef struct conv_start_argument {
 	GtkButton *stop_button;
 	GtkProgressBar *progrbar;
 	GtkTextView *textview;
+	GtkComboBox *combobox_color;
+	GtkComboBox *combobox_filenaming;
 } conv_start_argument_t;
 
 typedef struct conv_stop_argument {
@@ -236,6 +238,10 @@ void button_convert_clicked_cb(GtkButton *button, conv_start_argument_t *arg)
 	conv_params->meta.exptime = atof(gtk_entry_get_text(arg->entry_exposure));
 	conv_params->meta.temperature = atof(gtk_entry_get_text(arg->entry_temperature));
 
+	conv_params->imsetup.mode = gtk_combo_box_get_active(arg->combobox_color);
+
+	conv_params->fsetup.naming = gtk_combo_box_get_active(arg->combobox_filenaming);
+
 	memset(conv_params->inpath, 0, sizeof(conv_params->inpath));
 	strncpy(conv_params->inpath, RAW_PATH, strlen(RAW_PATH));
 
@@ -366,6 +372,8 @@ int main(int argc, char *argv[])
 	conv_arg.entry_observer = GTK_ENTRY(gtk_builder_get_object(builder, "entry_observer"));
 	conv_arg.entry_notes = GTK_ENTRY(gtk_builder_get_object(builder, "entry_notes"));
 	conv_arg.entry_date = GTK_ENTRY(gtk_builder_get_object(builder, "entry_date"));
+	conv_arg.combobox_color = GTK_COMBO_BOX(gtk_builder_get_object(builder, "combobox_color"));
+	conv_arg.combobox_filenaming = GTK_COMBO_BOX(gtk_builder_get_object(builder, "combobox_outfilename"));
 
 	conv_arg.progrbar = GTK_PROGRESS_BAR(gtk_builder_get_object(builder, "conv_progressbar"));
 
