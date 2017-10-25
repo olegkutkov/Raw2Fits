@@ -11,7 +11,9 @@
 static char *RAW_PATH = NULL;
 static char *OUT_PATH = NULL;
 
+static GMainContext *main_context;
 static GMutex progress_bar_mutex;
+static GMutex logger_mutex;
 
 typedef struct dialog_argument {
 	GtkWindow *main_window;
@@ -23,6 +25,11 @@ typedef struct about_dialog_argument {
 	GtkWindow *main_window;
 	GtkDialog *dlg;
 } about_dialog_argument_t;
+
+typedef struct log_msg_threaded {
+	void *arg;
+	char buf[256];
+} log_msg_threaded_t;
 
 typedef struct conv_start_argument {
 	GtkEntry *entry_object;
@@ -104,31 +111,71 @@ void progress_setup(void *arg, int max_val)
 	progr->current_value = 0;
 }
 
-void progress_update(void *arg)
+static gboolean update_progress_bar(gpointer arg)
 {
-	g_mutex_lock(&progress_bar_mutex);
-
 	progress_params_t *progr = (progress_params_t*) arg;
 	GtkProgressBar *pbar = GTK_PROGRESS_BAR(progr->progr_arg);
 
 	gdouble fraction = gtk_progress_bar_get_fraction(pbar);
-
 	fraction += progr->fraction;
 
 	gtk_progress_bar_set_fraction(pbar, fraction);
 
-	g_mutex_unlock(&progress_bar_mutex);
-
-	while (gtk_events_pending ()) {
-		gtk_main_iteration();
-	}
+	return G_SOURCE_REMOVE;
 }
 
-void logger_msg(void *arg, char *fmt, ...)
+void progress_update(void *arg)
+{
+	GSource *source;
+
+	g_mutex_lock(&progress_bar_mutex);
+
+	source = g_idle_source_new();
+
+	g_source_set_callback(source, update_progress_bar, arg, NULL);
+	g_source_attach(source, main_context);
+	g_source_unref(source);
+
+	g_mutex_unlock(&progress_bar_mutex);
+}
+
+static gboolean update_textarea(gpointer user_data)
 {
 	GtkTextBuffer *buffer;
 	GtkTextMark *mark;
 	GtkTextIter iter;
+	log_msg_threaded_t *log_arg = (log_msg_threaded_t *) user_data;
+
+	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (log_arg->arg));
+	mark = gtk_text_buffer_get_insert (buffer);
+	gtk_text_buffer_get_iter_at_mark (buffer, &iter, mark);
+	gtk_text_buffer_insert(buffer, &iter, log_arg->buf, -1);
+
+	gtk_text_view_scroll_to_mark(GTK_TEXT_VIEW(log_arg->arg), gtk_text_buffer_get_insert(buffer), 0.0, FALSE, 0.5, 0.5);
+
+	free(user_data);
+
+	return G_SOURCE_REMOVE;
+}
+
+void logger_msg_preformat(void *arg, char *str)
+{
+	log_msg_threaded_t *log_arg = (log_msg_threaded_t *) malloc(sizeof(log_msg_threaded_t));
+	GSource *source;
+
+	log_arg->arg = arg;
+	strcpy(log_arg->buf, str);
+
+	source = g_idle_source_new();
+
+	g_source_set_callback(source, update_textarea, log_arg, NULL);
+	g_source_attach(source, main_context);
+	g_source_unref(source);
+}
+
+void logger_msg(void *arg, char *fmt, ...)
+{
+	g_mutex_lock(&logger_mutex);
 
 	char buf[256];
 
@@ -136,16 +183,13 @@ void logger_msg(void *arg, char *fmt, ...)
 
 	va_start(args, fmt);
 	vsnprintf(buf, 256, fmt, args);
-	va_end(args);
-
 	buf[255] = '\0';
 
-	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (arg));
-	mark = gtk_text_buffer_get_insert (buffer);
-	gtk_text_buffer_get_iter_at_mark (buffer, &iter, mark);
-	gtk_text_buffer_insert(buffer, &iter, buf, -1);
+	va_end(args);
 
-	gtk_text_view_scroll_to_mark(GTK_TEXT_VIEW(arg), gtk_text_buffer_get_insert(buffer), 0.0, FALSE, 0.5, 0.5);
+	logger_msg_preformat(arg, buf);
+
+	g_mutex_unlock(&logger_mutex);
 }
 
 void button_convert_clicked_cb(GtkButton *button, conv_start_argument_t *arg)
@@ -356,12 +400,16 @@ int main(int argc, char *argv[])
 	g_object_unref(builder);
 
 	g_mutex_init(&progress_bar_mutex);
+	g_mutex_init(&logger_mutex);
+
+	main_context = g_main_context_default();
 
 	gtk_widget_show(window);                
 	gtk_main();
 
 	converter_stop(conv_stop_arg.conv_params);
 
+	g_mutex_clear(&logger_mutex);
 	g_mutex_clear(&progress_bar_mutex);
 
 	return 0;
