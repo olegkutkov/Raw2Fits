@@ -5,13 +5,32 @@
 #include <string.h>
 #include <errno.h>
 #include <fitsio.h>
-#include <libgen.h>
+#include "file_utils.h"
 #include "raw2fits.h"
+
+static int decoder_progress_callback(void *data, enum LibRaw_progress p,int iteration, int expected)
+{
+	converter_params_t *params = (converter_params_t *) data;
+
+	params->logger_msg(params->logger_arg, "\t%s, step %i/%i\n", libraw_strprogress(p), iteration + 1, expected);
+
+	return !params->converter_run;
+}
 
 void raw2fits(char *file, converter_params_t *arg)
 {
 	libraw_decoder_info_t decoder_info;
-	libraw_data_t *rawdata = libraw_init(0);
+	libraw_data_t *rawdata;
+	char target_filename[512];
+
+	make_target_fits_filename(arg, file, target_filename);
+
+	if (is_file_exist(target_filename) && !arg->fsetup.overwrite) {
+		arg->logger_msg(arg->logger_arg, "File %s is already exists, skipping...\n", target_filename);
+		return;
+	}
+
+	rawdata = libraw_init(0);
 
 	if (!rawdata) {
 		arg->logger_msg(arg->logger_arg, "Failed to init libraw, err: \n", strerror(errno));
@@ -24,6 +43,8 @@ void raw2fits(char *file, converter_params_t *arg)
 		return;
 	}
 
+	libraw_set_progress_handler(rawdata, &decoder_progress_callback, arg);
+
 	if (libraw_unpack(rawdata) != LIBRAW_SUCCESS) {
 		arg->logger_msg(arg->logger_arg, "Failed to unpack RAW file, err: \n", strerror(errno));
 		libraw_close(rawdata);
@@ -32,8 +53,9 @@ void raw2fits(char *file, converter_params_t *arg)
 
 	libraw_get_decoder_info(rawdata, &decoder_info);
 
-	arg->logger_msg(arg->logger_arg, "Decoding using %s\n", decoder_info.decoder_name);
+	arg->logger_msg(arg->logger_arg, "\tConverting raw image using %s\n", decoder_info.decoder_name);
 
+	libraw_raw2image(rawdata);
 
 
 
@@ -50,13 +72,6 @@ typedef struct frame {
 	long *green_channel;
 	FRAME_MODE mode;
 } frame_t;
-
-static int my_progress_callback(void *data,enum LibRaw_progress p,int iteration, int expected)
-{
-	printf("Decoding progress: %s  iter = %i  exp = %i\n", libraw_strprogress(p), iteration, expected);
-
-	return 0;
-}
 
 void write_fits_header(fitsfile *fptr, file_metadata_t *meta)
 {
@@ -82,16 +97,6 @@ void write_fits(libraw_data_t *raw, char *outdir, char *filename, frame_t *frame
 	long *frame_buf = NULL;
 	int write_all = 0;
 
-	size_t outdir_len = strlen(outdir);
-	size_t filename_len = strlen(filename);
-	char *outname = (char *) malloc(outdir_len + filename_len + 5);
-
-	strncpy(outname, outdir, outdir_len);
-	outname[outdir_len] = '/';
-	strncpy(outname + outdir_len + 1, filename, filename_len);
-	strncpy(outname + outdir_len + 1 + filename_len - 3, "fits", 4);
-
-	outname[outdir_len + filename_len + 2] = '\0';
 
 	if (is_file_exist(outname)){
 		printf("File \"%s\" is already exists, skipping...\n", outname);
@@ -168,11 +173,6 @@ static void convert_one_file(char *file, void *arg)
 
 	printf("convert_one_file called with arg %s %s\n", file, cb_arg->outdir);
 
-
-	libraw_set_progress_handler(rawdata, &my_progress_callback, NULL);
-
-
-	libraw_raw2image(rawdata);
 
 	rawdata->params.no_auto_bright = 1;
 	rawdata->params.no_interpolation = 1;
