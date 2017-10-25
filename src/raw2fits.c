@@ -21,7 +21,11 @@ void raw2fits(char *file, converter_params_t *arg)
 {
 	libraw_decoder_info_t decoder_info;
 	libraw_data_t *rawdata;
+	libraw_processed_image_t *proc_img;
 	char target_filename[512];
+	long *framebuf;
+	int i, err,k = 0;
+	long red, green, blue;
 
 	make_target_fits_filename(arg, file, target_filename);
 
@@ -55,11 +59,82 @@ void raw2fits(char *file, converter_params_t *arg)
 
 	arg->logger_msg(arg->logger_arg, "\tConverting raw image using %s\n", decoder_info.decoder_name);
 
-	libraw_raw2image(rawdata);
+	if (libraw_raw2image(rawdata) != LIBRAW_SUCCESS) {
+		arg->logger_msg(arg->logger_arg, "Failed to extract image, err: \n", strerror(errno));
+		libraw_recycle(rawdata);
+		libraw_close(rawdata);
+		return;
+	}
 
+	if (libraw_dcraw_process(rawdata) != LIBRAW_SUCCESS) {
+		arg->logger_msg(arg->logger_arg, "Dcraw process failed, err: \n", strerror(errno));
+		libraw_free_image(rawdata);
+		libraw_recycle(rawdata);
+		libraw_close(rawdata);
+		return;
+	}
 
+	proc_img = libraw_dcraw_make_mem_image(rawdata, &err);
 
 	libraw_free_image(rawdata);
+
+	if (!proc_img) {
+		arg->logger_msg(arg->logger_arg, "Failed to make mem image, err: \n", strerror(err));
+//		libraw_free_image(rawdata);
+		libraw_recycle(rawdata);
+		libraw_close(rawdata);
+		return;
+	}
+
+	arg->logger_msg(arg->logger_arg, "\tImage decoded, size = %ix%i, bits = %i, colors = %i\n",
+									proc_img->width, proc_img->height, proc_img->bits, proc_img->colors);
+
+	framebuf = (long *) malloc(proc_img->width * proc_img->height * sizeof(long));
+
+	if (!framebuf) {
+		arg->logger_msg(arg->logger_arg, "Failed to allocate memory for the frame, err: \n", strerror(err));
+		libraw_dcraw_clear_mem(proc_img);
+//		libraw_free_image(rawdata);
+		libraw_recycle(rawdata);
+		libraw_close(rawdata);
+	}
+
+	for (i = 0; i < proc_img->width * proc_img->height; i++) {
+		red = proc_img->data[k];
+		green = proc_img->data[k + 1];
+		blue = proc_img->data[k + 2];
+
+		switch (arg->imsetup.mode) {
+			case GRAYSCALE:
+				framebuf[i] = red + green + blue;
+				break;
+
+			case RED_ONLY:
+				framebuf[i] = red;
+				break;
+
+			case GREEN_ONLY:
+				framebuf[i] = green;
+				break;
+
+			case BLUE_ONLY:
+				framebuf[i] = blue;
+				break;
+
+			case ALL_CHANNELS_BY_FILES:
+			case ALL_CHANNELS:
+				break;
+		}
+
+		k += 3;
+	}
+
+	
+
+	free(framebuf);
+
+	libraw_dcraw_clear_mem(proc_img);
+//	libraw_free_image(rawdata);
 	libraw_recycle(rawdata);
 	libraw_close(rawdata);
 }
@@ -230,19 +305,6 @@ static void convert_one_file(char *file, void *arg)
 //	}
 	
 
-	int k = 0;
-	long red, green, blue;
-
-	for (i = 0; i < proc_img->width * proc_img->height; i++) {
-		red = proc_img->data[k];
-		green = proc_img->data[k + 1];
-		blue = proc_img->data[k + 2];
-
-		frame_to_fits.red_channel[i] = red;
-
-		//frame_to_fits.green1_channel[i] = proc_img->data[k] + 1;
-		k += 3;
-	}
 
 	write_fits(rawdata, cb_arg->outdir, basename(file), &frame_to_fits, cb_arg->meta);
 
