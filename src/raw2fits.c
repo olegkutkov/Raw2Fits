@@ -2,11 +2,47 @@
 
 #include <sys/types.h>
 #include <libraw/libraw.h>
+#include <string.h>
+#include <errno.h>
 #include <fitsio.h>
 #include <libgen.h>
-#include "converter_types.h"
-#include "list.h"
+#include "raw2fits.h"
 
+void raw2fits(char *file, converter_params_t *arg)
+{
+	libraw_decoder_info_t decoder_info;
+	libraw_data_t *rawdata = libraw_init(0);
+
+	if (!rawdata) {
+		arg->logger_msg(arg->logger_arg, "Failed to init libraw, err: \n", strerror(errno));
+		return;
+	}
+
+	if (libraw_open_file(rawdata, file) != LIBRAW_SUCCESS) {
+		arg->logger_msg(arg->logger_arg, "Failed to open RAW file, err: \n", strerror(errno));
+		libraw_close(rawdata);
+		return;
+	}
+
+	if (libraw_unpack(rawdata) != LIBRAW_SUCCESS) {
+		arg->logger_msg(arg->logger_arg, "Failed to unpack RAW file, err: \n", strerror(errno));
+		libraw_close(rawdata);
+		return;
+	}
+
+	libraw_get_decoder_info(rawdata, &decoder_info);
+
+	arg->logger_msg(arg->logger_arg, "Decoding using %s\n", decoder_info.decoder_name);
+
+
+
+
+	libraw_free_image(rawdata);
+	libraw_recycle(rawdata);
+	libraw_close(rawdata);
+}
+
+/*
 typedef struct frame {
 	long *grayscale_combined;
 	long *red_channel;
@@ -20,12 +56,6 @@ static int my_progress_callback(void *data,enum LibRaw_progress p,int iteration,
 	printf("Decoding progress: %s  iter = %i  exp = %i\n", libraw_strprogress(p), iteration, expected);
 
 	return 0;
-}
-
-int is_file_exist(char *filename)
-{
-	struct stat buffer;
-	return (stat (filename, &buffer) == 0);
 }
 
 void write_fits_header(fitsfile *fptr, file_metadata_t *meta)
@@ -128,7 +158,7 @@ void write_fits(libraw_data_t *raw, char *outdir, char *filename, frame_t *frame
 
 static void convert_one_file(char *file, void *arg)
 {
-/*	long int i = 0;
+	long int i = 0;
 
 	float *frameGray;//, *frameGreen, *frameBlue, *frameGrayscale;
 
@@ -138,27 +168,9 @@ static void convert_one_file(char *file, void *arg)
 
 	printf("convert_one_file called with arg %s %s\n", file, cb_arg->outdir);
 
-	libraw_data_t *rawdata = libraw_init(0);
-
-	if (!rawdata) {
-		return;
-	}
 
 	libraw_set_progress_handler(rawdata, &my_progress_callback, NULL);
 
-	libraw_open_file(rawdata, file);
-
-
-	printf("iso: %f  shutter speed: %f \n", rawdata->other.iso_speed, rawdata->other.shutter);
-
-
-	libraw_unpack(rawdata);
-	
-	libraw_decoder_info_t decoder_info;
-
-	libraw_get_decoder_info(rawdata, &decoder_info);
-
-	printf("raw decoder: %s\n", decoder_info.decoder_name);
 
 	libraw_raw2image(rawdata);
 
@@ -251,10 +263,6 @@ static void convert_one_file(char *file, void *arg)
 //                        rawdata->image[0][3]
 //                );
 
-	libraw_free_image(rawdata);
-	libraw_recycle(rawdata);
-	libraw_close(rawdata);
-*/
 }
-
+*/
 
