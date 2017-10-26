@@ -188,4 +188,8 @@ void make_target_fits_filename(converter_params_t *arg, char *raw_filename, char
 	free(out_file_name_base);
 }
 
+int remove_file(const char *filename)
+{
+	return unlink(filename);
+}
 
