@@ -5,6 +5,7 @@
 #include <string.h>
 #include <errno.h>
 #include <fitsio.h>
+#include <time.h>
 #include "file_utils.h"
 #include "raw2fits.h"
 
@@ -70,19 +71,92 @@ void print_error(converter_params_t *arg, char *err_where, int err)
 	arg->logger_msg(arg->logger_arg, "%s. %s\n", err_where, err_descr);
 }
 
+void set_metadata_from_raw(libraw_data_t *rawdata, libraw_processed_image_t *proc_img, file_metadata_t *dst_meta)
+{
+	size_t tmplen;
+	struct tm *utc_tm;
+
+	if (strlen(dst_meta->instrument) == 0) {
+		tmplen = strlen(rawdata->idata.make);
+		strcpy(dst_meta->instrument, rawdata->idata.make);
+		dst_meta->instrument[tmplen] = 0x20;
+		strcpy(dst_meta->instrument + tmplen + 1, rawdata->idata.model);
+	}
+
+	if (strlen(dst_meta->observer) == 0) {
+		strcpy(dst_meta->observer, rawdata->other.artist);
+	}
+
+	if (strlen(dst_meta->date) == 0) {
+		utc_tm = gmtime(&rawdata->other.timestamp);
+		strftime(dst_meta->date, strlen(dst_meta->date), "%Y-%m-%d %H:%M:%S", utc_tm);
+	}
+
+	if (dst_meta->exptime == 0) {
+		dst_meta->exptime = rawdata->other.shutter;
+	}
+
+	dst_meta->bitpixel = proc_img->bits;
+	dst_meta->width = proc_img->width;
+	dst_meta->height = proc_img->height;
+}
+
+int create_new_fits(fitsfile **fptr, char *filename, int recreate)
+{
+	int status = 0;
+	fitsfile *tmp;
+
+	if (recreate) {
+		fits_open_file(&tmp, filename, READONLY, &status);
+		status = 0;
+		fits_delete_file(tmp, &status);
+	}
+
+	status = 0;
+
+	fits_create_file(fptr, filename, &status);
+
+	return status;
+}
+
+void close_fits(fitsfile *fptr)
+{
+	int status = 0;
+
+	fits_flush_file(fptr, &status);
+	fits_close_file(fptr, &status);
+}
+
+void write_fits_header(fitsfile *fptr, file_metadata_t *meta)
+{
+	int status = 0;
+
+	fits_write_key(fptr, TSTRING, "OBJECT", meta->object, "", &status);
+	fits_write_key(fptr, TSTRING, "OBSERVER", meta->observer, "", &status);
+	fits_write_key(fptr, TSTRING, "TELESCOP", meta->telescope, "", &status);
+	fits_write_key(fptr, TSTRING, "INSTRUME", meta->instrument, "", &status);
+	fits_write_key(fptr, TSTRING, "FILTER", meta->filter, "Filter used when taking image", &status);
+	fits_write_key(fptr, TFLOAT, "EXPTIME", &meta->exptime, "Exposure time in seconds", &status);
+}
+
+
 void raw2fits(char *file, converter_params_t *arg)
 {
 	libraw_decoder_info_t decoder_info;
 	libraw_data_t *rawdata;
 	libraw_processed_image_t *proc_img;
 	char target_filename[512];
+	fitsfile *fits;
 	long *framebuf;
 	int i, err, k = 0;
+	int target_file_exists = 0;
 	long red, green, blue;
 
 	make_target_fits_filename(arg, file, target_filename);
 
-	if (is_file_exist(target_filename) && !arg->fsetup.overwrite) {
+	target_file_exists = is_file_exist(target_filename);
+
+	if (target_file_exists && !arg->fsetup.overwrite) { 
 		arg->logger_msg(arg->logger_arg, "File %s is already exists, skipping...\n", target_filename);
 		return;
 	}
@@ -150,6 +224,8 @@ void raw2fits(char *file, converter_params_t *arg)
 	arg->logger_msg(arg->logger_arg, "\tImage decoded, size = %ix%i, bits = %i, colors = %i\n",
 									proc_img->width, proc_img->height, proc_img->bits, proc_img->colors);
 
+	set_metadata_from_raw(rawdata, proc_img, &arg->meta);
+
 	framebuf = (long *) malloc(proc_img->width * proc_img->height * sizeof(long));
 
 	if (!framebuf) {
@@ -190,7 +266,11 @@ void raw2fits(char *file, converter_params_t *arg)
 		k += 3;
 	}
 
-	
+	err = create_new_fits(&fits, target_filename, target_file_exists);
+
+	arg->logger_msg(arg->logger_arg, "Creating FITS %s status = %i\n", target_filename, err);
+
+	close_fits(fits);
 
 	free(framebuf);
 
