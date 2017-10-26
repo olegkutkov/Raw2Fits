@@ -117,7 +117,7 @@ void close_fits(fitsfile *fptr)
 	fits_close_file(fptr, &status);
 }
 
-void write_fits_header(fitsfile *fptr, file_metadata_t *meta)
+int write_fits_header(fitsfile *fptr, file_metadata_t *meta)
 {
 	int status = 0;
 
@@ -127,6 +127,8 @@ void write_fits_header(fitsfile *fptr, file_metadata_t *meta)
 	fits_write_key(fptr, TSTRING, "INSTRUME", meta->instrument, "", &status);
 	fits_write_key(fptr, TSTRING, "FILTER", meta->filter, "Filter used when taking image", &status);
 	fits_write_key(fptr, TFLOAT, "EXPTIME", &meta->exptime, "Exposure time in seconds", &status);
+
+	return status;
 }
 
 
