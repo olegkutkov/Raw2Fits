@@ -21,8 +21,12 @@ typedef struct file_metadata {
 	int bitpixel;
 	unsigned int width;
 	unsigned int height;
-	double exptime;
-	double temperature;
+	float exptime;
+	float temperature;
+	char overwrite_instrument;
+	char overwrite_observer;
+	char overwrite_exptime;
+	char overwrite_date;
 	char object[72];
 	char telescope[72];
 	char instrument[72];
