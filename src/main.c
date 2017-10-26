@@ -239,6 +239,15 @@ void button_convert_clicked_cb(GtkButton *button, conv_start_argument_t *arg)
 	conv_params->meta.exptime = atof(gtk_entry_get_text(arg->entry_exposure));
 	conv_params->meta.temperature = atof(gtk_entry_get_text(arg->entry_temperature));
 
+	conv_params->meta.bitpixel = 0;
+	conv_params->meta.width = 0;
+	conv_params->meta.height = 0;
+
+	conv_params->meta.overwrite_instrument = 0;
+	conv_params->meta.overwrite_observer = 0;
+	conv_params->meta.overwrite_exptime = 0;
+	conv_params->meta.overwrite_date = 0;
+
 	conv_params->imsetup.mode = gtk_combo_box_get_active(arg->combobox_color);
 
 	conv_params->fsetup.naming = gtk_combo_box_get_active(arg->combobox_filenaming);
