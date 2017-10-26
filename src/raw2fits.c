@@ -101,19 +101,9 @@ void set_metadata_from_raw(libraw_data_t *rawdata, libraw_processed_image_t *pro
 	dst_meta->height = proc_img->height;
 }
 
-int create_new_fits(fitsfile **fptr, char *filename, int recreate)
+inline int create_new_fits(fitsfile **fptr, char *filename)
 {
 	int status = 0;
-	fitsfile *tmp;
-
-	if (recreate) {
-		fits_open_file(&tmp, filename, READONLY, &status);
-		status = 0;
-		fits_delete_file(tmp, &status);
-	}
-
-	status = 0;
-
 	fits_create_file(fptr, filename, &status);
 
 	return status;
@@ -273,7 +263,7 @@ void raw2fits(char *file, converter_params_t *arg)
 		k += 3;
 	}
 
-	err = create_new_fits(&fits, target_filename, target_file_exists);
+	err = create_new_fits(&fits, target_filename);
 
 	arg->logger_msg(arg->logger_arg, "Creating FITS %s status = %i\n", target_filename, err);
 
