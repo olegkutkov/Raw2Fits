@@ -7,7 +7,9 @@ CFLAGS := -Wall -g -ggdb -pipe
 
 GTKLIB=`pkg-config --cflags --libs gtk+-3.0`
 
-LDFLAG := $(GTKLIB) -L/usr/lib -lraw -lm -lcfitsio -export-dynamic -pthread
+LIBRAW := -L/usr/lib -lraw
+
+LDFLAG := $(GTKLIB) $(LIBRAW) -lm -lcfitsio -export-dynamic -pthread
 
 SRC := src/main.c src/converter.c src/list.c src/file_utils.c src/thread_pool.c src/raw2fits.c
 
