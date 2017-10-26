@@ -75,25 +75,31 @@ void set_metadata_from_raw(libraw_data_t *rawdata, libraw_processed_image_t *pro
 {
 	size_t tmplen;
 	struct tm *utc_tm;
+	char time_buf[25];
 
-	if (strlen(dst_meta->instrument) == 0) {
+	if ((strlen(dst_meta->instrument) == 0) || dst_meta->overwrite_instrument) {
 		tmplen = strlen(rawdata->idata.make);
 		strcpy(dst_meta->instrument, rawdata->idata.make);
 		dst_meta->instrument[tmplen] = 0x20;
 		strcpy(dst_meta->instrument + tmplen + 1, rawdata->idata.model);
+		dst_meta->overwrite_instrument = 1;
 	}
 
-	if (strlen(dst_meta->observer) == 0) {
+	if ((strlen(dst_meta->observer) == 0) || dst_meta->overwrite_observer) {
 		strcpy(dst_meta->observer, rawdata->other.artist);
+		dst_meta->overwrite_observer = 1;
 	}
 
-	if (strlen(dst_meta->date) == 0) {
+	if ((strlen(dst_meta->date) == 0) || dst_meta->overwrite_date) {
 		utc_tm = gmtime(&rawdata->other.timestamp);
-		strftime(dst_meta->date, strlen(dst_meta->date), "%Y-%m-%d %H:%M:%S", utc_tm);
+		strftime(time_buf, 25, "%Y-%m-%d %H:%M:%S", utc_tm);
+		strcpy(dst_meta->date, time_buf);
+		dst_meta->overwrite_date = 1;
 	}
 
-	if (dst_meta->exptime == 0) {
+	if (dst_meta->exptime == 0 || dst_meta->overwrite_exptime) {
 		dst_meta->exptime = rawdata->other.shutter;
+		dst_meta->overwrite_exptime = 1;
 	}
 
 	dst_meta->bitpixel = proc_img->bits;
@@ -117,6 +123,17 @@ void close_fits(fitsfile *fptr)
 	fits_close_file(fptr, &status);
 }
 
+int create_fits_image(fitsfile *fptr, int width, int height, int bitpixel)
+{
+	unsigned int naxis = 2;
+	long naxes[2] = { width, height };
+	int status = 0;
+
+	fits_create_img(fptr, bitpixel, naxis, naxes, &status);
+
+	return status;
+}
+
 int write_fits_header(fitsfile *fptr, file_metadata_t *meta)
 {
 	int status = 0;
@@ -127,6 +144,9 @@ int write_fits_header(fitsfile *fptr, file_metadata_t *meta)
 	fits_write_key(fptr, TSTRING, "INSTRUME", meta->instrument, "", &status);
 	fits_write_key(fptr, TSTRING, "FILTER", meta->filter, "Filter used when taking image", &status);
 	fits_write_key(fptr, TFLOAT, "EXPTIME", &meta->exptime, "Exposure time in seconds", &status);
+	fits_write_key(fptr, TFLOAT, "TEMPER", &meta->temperature, "Camera temperature in C", &status);
+	fits_write_key(fptr, TSTRING, "DATE", meta->date, "Date and time", &status);
+	fits_write_key(fptr, TSTRING, "NOTES", meta->note, "", &status);
 
 	return status;
 }
@@ -265,9 +285,28 @@ void raw2fits(char *file, converter_params_t *arg)
 		k += 3;
 	}
 
+	arg->logger_msg(arg->logger_arg, "Creating FITS %s\n", target_filename);
+
 	err = create_new_fits(&fits, target_filename);
 
-	arg->logger_msg(arg->logger_arg, "Creating FITS %s status = %i\n", target_filename, err);
+	if (err != 0) {
+		arg->logger_msg(arg->logger_arg, "Failed to create file, error %i\n", err);
+		libraw_recycle(rawdata);
+		libraw_close(rawdata);
+		return;
+	}
+
+	err = create_fits_image(fits, proc_img->width, proc_img->height, proc_img->bits);
+
+	err = write_fits_header(fits, &arg->meta);
+
+	if (err != 0) {
+		arg->logger_msg(arg->logger_arg, "Failed to write FITS header, error %i\n", err);
+		libraw_recycle(rawdata);
+		libraw_close(rawdata);
+		return;
+	}
+
 
 	close_fits(fits);
 
