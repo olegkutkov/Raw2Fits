@@ -156,9 +156,16 @@ void raw2fits(char *file, converter_params_t *arg)
 
 	target_file_exists = is_file_exist(target_filename);
 
-	if (target_file_exists && !arg->fsetup.overwrite) { 
-		arg->logger_msg(arg->logger_arg, "File %s is already exists, skipping...\n", target_filename);
-		return;
+	if (target_file_exists) {
+		if (!arg->fsetup.overwrite) {
+			arg->logger_msg(arg->logger_arg, "File %s is already exists, skipping...\n", target_filename);
+			return;
+		}
+
+		if (remove_file(target_filename) < 0) {
+			arg->logger_msg(arg->logger_arg, "Unable to remove old file %s, error: \n", strerror(errno));
+			return;
+		}
 	}
 
 	rawdata = libraw_init(0);
