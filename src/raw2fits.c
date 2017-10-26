@@ -17,6 +17,59 @@ static int decoder_progress_callback(void *data, enum LibRaw_progress p,int iter
 	return !params->converter_run;
 }
 
+void print_error(converter_params_t *arg, char *err_where, int err)
+{
+	char *err_descr;
+
+	if (err > 0) {
+		err_descr = strerror(err);
+	} else {
+		switch (err) {
+			case LIBRAW_UNSUFFICIENT_MEMORY:
+				err_descr = "Attempt to get memory from the system has failed";
+				break;
+
+			case  LIBRAW_DATA_ERROR:
+				err_descr = "A fatal error emerged during data unpacking";
+				break;
+
+			case  LIBRAW_IO_ERROR:
+				err_descr = "A fatal error emerged during file reading";
+				break;
+
+			case  LIBRAW_CANCELLED_BY_CALLBACK:
+				err_descr = "Processing cancelled";
+				break;
+
+			case LIBRAW_BAD_CROP:
+				err_descr = "Incorrect cropping coordinates are set";
+				break;
+
+			case LIBRAW_UNSPECIFIED_ERROR:
+				err_descr = "An unknown error, sorry";
+				break;
+
+			case LIBRAW_FILE_UNSUPPORTED:
+				err_descr = "Unsupported file format";
+				break;
+
+			case LIBRAW_REQUEST_FOR_NONEXISTENT_IMAGE:
+				err_descr = "Attempt to retrieve a RAW image with a number absent in the data file";
+				break;
+
+			case LIBRAW_OUT_OF_ORDER_CALL:
+				err_descr = "Incorrect order of API function calls. This is a problem with raw2fits";
+				break;
+
+			default:
+				err_descr = "Unknown internal error";
+				break;
+		}
+	}
+
+	arg->logger_msg(arg->logger_arg, "%s. %s\n", err_where, err_descr);
+}
+
 void raw2fits(char *file, converter_params_t *arg)
 {
 	libraw_decoder_info_t decoder_info;
@@ -24,7 +77,7 @@ void raw2fits(char *file, converter_params_t *arg)
 	libraw_processed_image_t *proc_img;
 	char target_filename[512];
 	long *framebuf;
-	int i, err,k = 0;
+	int i, err, k = 0;
 	long red, green, blue;
 
 	make_target_fits_filename(arg, file, target_filename);
@@ -41,16 +94,20 @@ void raw2fits(char *file, converter_params_t *arg)
 		return;
 	}
 
-	if (libraw_open_file(rawdata, file) != LIBRAW_SUCCESS) {
-		arg->logger_msg(arg->logger_arg, "Failed to open RAW file, err: \n", strerror(errno));
+	err = libraw_open_file(rawdata, file);
+
+	if (err != LIBRAW_SUCCESS) {
+		print_error(arg, "Failed to open RAW file", err);
 		libraw_close(rawdata);
 		return;
 	}
 
 	libraw_set_progress_handler(rawdata, &decoder_progress_callback, arg);
 
-	if (libraw_unpack(rawdata) != LIBRAW_SUCCESS) {
-		arg->logger_msg(arg->logger_arg, "Failed to unpack RAW file, err: \n", strerror(errno));
+	err = libraw_unpack(rawdata);
+
+	if (err != LIBRAW_SUCCESS) {
+		print_error(arg, "Failed to unpack RAW file", err);
 		libraw_close(rawdata);
 		return;
 	}
@@ -59,15 +116,19 @@ void raw2fits(char *file, converter_params_t *arg)
 
 	arg->logger_msg(arg->logger_arg, "\tConverting raw image using %s\n", decoder_info.decoder_name);
 
-	if (libraw_raw2image(rawdata) != LIBRAW_SUCCESS) {
-		arg->logger_msg(arg->logger_arg, "Failed to extract image, err: \n", strerror(errno));
+	err = libraw_raw2image(rawdata);
+
+	if (err != LIBRAW_SUCCESS) {
+		print_error(arg, "Failed to extract image", err);
 		libraw_recycle(rawdata);
 		libraw_close(rawdata);
 		return;
 	}
 
-	if (libraw_dcraw_process(rawdata) != LIBRAW_SUCCESS) {
-		arg->logger_msg(arg->logger_arg, "Dcraw process failed, err: \n", strerror(errno));
+	err = libraw_dcraw_process(rawdata);
+
+	if (err != LIBRAW_SUCCESS) {
+		print_error(arg, "Dcraw process failed", err);
 		libraw_free_image(rawdata);
 		libraw_recycle(rawdata);
 		libraw_close(rawdata);
@@ -79,7 +140,7 @@ void raw2fits(char *file, converter_params_t *arg)
 	libraw_free_image(rawdata);
 
 	if (!proc_img) {
-		arg->logger_msg(arg->logger_arg, "Failed to make mem image, err: \n", strerror(err));
+		print_error(arg, "Failed to make mem image", err);
 //		libraw_free_image(rawdata);
 		libraw_recycle(rawdata);
 		libraw_close(rawdata);
