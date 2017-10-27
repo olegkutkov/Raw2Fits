@@ -235,32 +235,27 @@ void button_convert_clicked_cb(GtkButton *button, conv_start_argument_t *arg)
 
 	conv_params->converter_run = 1;
 
+	memset(&conv_params->meta, 0, sizeof(file_metadata_t));
+
 	const char *entry_object_text = gtk_entry_get_text(arg->entry_object);
-	memset(conv_params->meta.object, 0, sizeof(conv_params->meta.object));
 	strncpy(conv_params->meta.object, entry_object_text, strlen(entry_object_text));
 
 	const char *entry_instrument_text = gtk_entry_get_text(arg->entry_instrument);
-	memset(conv_params->meta.instrument, 0, sizeof(conv_params->meta.instrument));
 	strncpy(conv_params->meta.instrument, entry_instrument_text, strlen(entry_instrument_text));
 
 	const char *entry_filter_text = gtk_entry_get_text(arg->entry_filter);
-	memset(conv_params->meta.filter, 0, sizeof(conv_params->meta.filter));
 	strncpy(conv_params->meta.filter, entry_filter_text, strlen(entry_filter_text));
 
 	const char *entry_telescope_text = gtk_entry_get_text(arg->entry_telescope);
-	memset(conv_params->meta.telescope, 0, sizeof(conv_params->meta.telescope));
 	strncpy(conv_params->meta.telescope, entry_telescope_text, strlen(entry_telescope_text));
 
 	const char *entry_observer_text = gtk_entry_get_text(arg->entry_observer);
-	memset(conv_params->meta.observer, 0, sizeof(conv_params->meta.observer));
 	strncpy(conv_params->meta.observer, entry_observer_text, strlen(entry_observer_text));
 
 	const char *entry_notes_text = gtk_entry_get_text(arg->entry_notes);
-	memset(conv_params->meta.note, 0, sizeof(conv_params->meta.note));
 	strncpy(conv_params->meta.note, entry_notes_text, strlen(entry_notes_text));
 
 	const char *entry_date_text = gtk_entry_get_text(arg->entry_date);
-	memset(conv_params->meta.date, 0, sizeof(conv_params->meta.date));
 	strncpy(conv_params->meta.date, entry_date_text, strlen(entry_date_text));
 
 	conv_params->meta.exptime = atof(gtk_entry_get_text(arg->entry_exposure));
