@@ -59,7 +59,7 @@ typedef struct progress_params {
 } progress_params_t;
 
 typedef void (*logger_msg_cb) (void*, char*, ...);
-typedef void (*done_cb) (void);
+typedef void (*done_cb) (void*);
 
 typedef struct converter_params {
 	char converter_run;
@@ -71,6 +71,7 @@ typedef struct converter_params {
 	progress_params_t progress;
 	void *logger_arg;
 	logger_msg_cb logger_msg;
+	void *done_arg;
 	done_cb complete;
 } converter_params_t;
 
