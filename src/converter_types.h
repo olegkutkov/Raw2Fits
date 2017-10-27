@@ -56,7 +56,6 @@ typedef struct progress_params {
 	progress_setup_cb progr_setup;
 	progress_update_cb progr_update;
 	float fraction;
-	int current_value;
 } progress_params_t;
 
 typedef void (*logger_msg_cb) (void*, char*, ...);

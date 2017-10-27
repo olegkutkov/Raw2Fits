@@ -114,7 +114,6 @@ void progress_setup(void *arg, int max_val)
 	gtk_progress_bar_set_fraction(pbar, 0.0);
 
 	progr->fraction = 1.0 / max_val;
-	progr->current_value = 0;
 }
 
 static gboolean update_progress_bar(gpointer arg)
