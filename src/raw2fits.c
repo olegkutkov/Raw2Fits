@@ -18,54 +18,14 @@ static int decoder_progress_callback(void *data, enum LibRaw_progress p,int iter
 	return !params->converter_run;
 }
 
-void print_error(converter_params_t *arg, char *err_where, int err)
+inline void print_error(converter_params_t *arg, char *err_where, int err)
 {
-	char *err_descr;
+	const char *err_descr;
 
 	if (err > 0) {
 		err_descr = strerror(err);
 	} else {
-		switch (err) {
-			case LIBRAW_UNSUFFICIENT_MEMORY:
-				err_descr = "Attempt to get memory from the system has failed";
-				break;
-
-			case  LIBRAW_DATA_ERROR:
-				err_descr = "A fatal error emerged during data unpacking";
-				break;
-
-			case  LIBRAW_IO_ERROR:
-				err_descr = "A fatal error emerged during file reading";
-				break;
-
-			case  LIBRAW_CANCELLED_BY_CALLBACK:
-				err_descr = "Processing cancelled";
-				break;
-
-			case LIBRAW_BAD_CROP:
-				err_descr = "Incorrect cropping coordinates are set";
-				break;
-
-			case LIBRAW_UNSPECIFIED_ERROR:
-				err_descr = "An unknown error, sorry";
-				break;
-
-			case LIBRAW_FILE_UNSUPPORTED:
-				err_descr = "Unsupported file format";
-				break;
-
-			case LIBRAW_REQUEST_FOR_NONEXISTENT_IMAGE:
-				err_descr = "Attempt to retrieve a RAW image with a number absent in the data file";
-				break;
-
-			case LIBRAW_OUT_OF_ORDER_CALL:
-				err_descr = "Incorrect order of API function calls. This is a problem with raw2fits";
-				break;
-
-			default:
-				err_descr = "Unknown internal error";
-				break;
-		}
+		err_descr = libraw_strerror(err);
 	}
 
 	arg->logger_msg(arg->logger_arg, "%s. %s\n", err_where, err_descr);
