@@ -49,6 +49,9 @@ typedef struct conv_start_argument {
 	GtkComboBox *combobox_color;
 	GtkComboBox *combobox_filenaming;
 	GtkCheckButton *overwrite_file;
+	GtkCheckButton *autobright;
+	GtkCheckButton *interpolation;
+	GtkCheckButton *autoscale;
 } conv_start_argument_t;
 
 typedef struct conv_stop_argument {
@@ -253,6 +256,9 @@ void button_convert_clicked_cb(GtkButton *button, conv_start_argument_t *arg)
 	conv_params->fsetup.naming = gtk_combo_box_get_active(arg->combobox_filenaming);
 
 	conv_params->fsetup.overwrite = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(arg->overwrite_file));
+	conv_params->imsetup.apply_auto_bright = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(arg->autobright));
+	conv_params->imsetup.apply_interpolation = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(arg->interpolation));
+	conv_params->imsetup.apply_autoscale = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(arg->autoscale));
 
 	memset(conv_params->inpath, 0, sizeof(conv_params->inpath));
 	strncpy(conv_params->inpath, RAW_PATH, strlen(RAW_PATH));
@@ -388,6 +394,9 @@ int main(int argc, char *argv[])
 	conv_arg.combobox_filenaming = GTK_COMBO_BOX(gtk_builder_get_object(builder, "combobox_outfilename"));
 
 	conv_arg.overwrite_file = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "checkbutton_overwrite_existing_file"));
+	conv_arg.autobright = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "checkbutton_autobright"));
+	conv_arg.interpolation = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "checkbutton_interpolation"));
+	conv_arg.autoscale = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "checkbutton_autoscale"));
 
 	conv_arg.progrbar = GTK_PROGRESS_BAR(gtk_builder_get_object(builder, "conv_progressbar"));
 
