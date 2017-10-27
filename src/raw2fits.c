@@ -31,7 +31,7 @@ inline void print_error(converter_params_t *arg, char *err_where, int err)
 	arg->logger_msg(arg->logger_arg, "%s. %s\n", err_where, err_descr);
 }
 
-void set_metadata_from_raw(libraw_data_t *rawdata, libraw_processed_image_t *proc_img, file_metadata_t *dst_meta)
+void set_metadata_from_raw(libraw_data_t *rawdata, file_metadata_t *dst_meta)
 {
 	size_t tmplen;
 	struct tm *utc_tm;
@@ -61,10 +61,6 @@ void set_metadata_from_raw(libraw_data_t *rawdata, libraw_processed_image_t *pro
 		dst_meta->exptime = rawdata->other.shutter;
 		dst_meta->overwrite_exptime = 1;
 	}
-
-	dst_meta->bitpixel = proc_img->bits;
-	dst_meta->width = proc_img->width;
-	dst_meta->height = proc_img->height;
 }
 
 inline int create_new_fits(fitsfile **fptr, char *filename)
@@ -135,22 +131,6 @@ void raw2fits(char *file, converter_params_t *arg)
 	int target_file_exists = 0;
 	long red, green, blue;
 
-	make_target_fits_filename(arg, file, target_filename);
-
-	target_file_exists = is_file_exist(target_filename);
-
-	if (target_file_exists) {
-		if (!arg->fsetup.overwrite) {
-			arg->logger_msg(arg->logger_arg, "File %s is already exists, skipping...\n", target_filename);
-			return;
-		}
-
-		if (remove_file(target_filename) < 0) {
-			arg->logger_msg(arg->logger_arg, "Unable to remove old file %s, error: \n", strerror(errno));
-			return;
-		}
-	}
-
 	rawdata = libraw_init(0);
 
 	if (!rawdata) {
@@ -168,13 +148,34 @@ void raw2fits(char *file, converter_params_t *arg)
 
 	libraw_set_progress_handler(rawdata, &decoder_progress_callback, arg);
 
-
 	err = libraw_unpack(rawdata);
 
 	if (err != LIBRAW_SUCCESS) {
 		print_error(arg, "Failed to unpack RAW file", err);
 		libraw_close(rawdata);
 		return;
+	}
+
+	set_metadata_from_raw(rawdata, &arg->meta);
+
+	make_target_fits_filename(arg, file, target_filename);
+
+	target_file_exists = is_file_exist(target_filename);
+
+	if (target_file_exists) {
+		if (!arg->fsetup.overwrite) {
+			arg->logger_msg(arg->logger_arg, "File %s is already exists, skipping...\n", target_filename);
+			libraw_recycle(rawdata);
+			libraw_close(rawdata);
+			return;
+		}
+
+		if (remove_file(target_filename) < 0) {
+			arg->logger_msg(arg->logger_arg, "Unable to remove old file %s, error: \n", strerror(errno));
+			libraw_recycle(rawdata);
+			libraw_close(rawdata);
+			return;
+		}
 	}
 
 	libraw_get_decoder_info(rawdata, &decoder_info);
@@ -218,10 +219,12 @@ void raw2fits(char *file, converter_params_t *arg)
 	arg->logger_msg(arg->logger_arg, "\tImage decoded, size = %ix%i, bits = %i, colors = %i\n",
 									proc_img->width, proc_img->height, proc_img->bits, proc_img->colors);
 
-	set_metadata_from_raw(rawdata, proc_img, &arg->meta);
-
 	libraw_recycle(rawdata);
 	libraw_close(rawdata);
+
+	arg->meta.bitpixel = proc_img->bits;
+	arg->meta.width = proc_img->width;
+	arg->meta.height = proc_img->height;
 
 	framebuf = (long *) malloc(proc_img->width * proc_img->height * sizeof(long));
 
