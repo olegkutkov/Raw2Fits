@@ -3,7 +3,7 @@
 CC := gcc 
 PROGRAM = raw2fits
 
-CFLAGS := -Wall -g -ggdb -pipe
+CFLAGS := -Wall -g -ggdb -pipe -I./include
 
 GTKLIB=`pkg-config --cflags --libs gtk+-3.0`
 
