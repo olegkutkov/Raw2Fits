@@ -31,6 +31,11 @@ typedef struct log_msg_threaded {
 	char buf[256];
 } log_msg_threaded_t;
 
+typedef struct done_cb_argument {
+	GtkWidget *start_button;
+	GtkWidget *stop_button;
+} done_cb_argument_t;
+
 typedef struct conv_start_argument {
 	GtkEntry *entry_object;
 	GtkEntry *entry_instrument;
@@ -42,6 +47,7 @@ typedef struct conv_start_argument {
 	GtkEntry *entry_notes;
 	GtkEntry *entry_date;
 	converter_params_t conv_params;
+	done_cb_argument_t done_params;
 	GtkTextBuffer *logger;
 	GtkButton *stop_button;
 	GtkProgressBar *progrbar;
@@ -197,6 +203,25 @@ void logger_msg(void *arg, char *fmt, ...)
 	g_mutex_unlock(&logger_mutex);
 }
 
+static gboolean converting_done_update_ui(gpointer user_data)
+{
+	done_cb_argument_t *done_arg = (done_cb_argument_t *) user_data;
+
+	gtk_widget_set_sensitive(done_arg->start_button, TRUE);
+	gtk_widget_set_sensitive(done_arg->stop_button, FALSE);
+
+	return G_SOURCE_REMOVE;
+}
+
+void converting_done(void *arg)
+{
+	GSource *source = g_idle_source_new();
+
+	g_source_set_callback(source, converting_done_update_ui, arg, NULL);
+	g_source_attach(source, main_context);
+	g_source_unref(source);
+}
+
 void button_convert_clicked_cb(GtkButton *button, conv_start_argument_t *arg)
 {
 	if (!RAW_PATH || !OUT_PATH) {
@@ -271,6 +296,9 @@ void button_convert_clicked_cb(GtkButton *button, conv_start_argument_t *arg)
 
 	conv_params->logger_arg = (void *) arg->textview;
 	conv_params->logger_msg = &logger_msg;
+
+	conv_params->complete = &converting_done;
+	conv_params->done_arg = (void *) &arg->done_params;
 
 	convert_files(conv_params);
 }
@@ -403,6 +431,9 @@ int main(int argc, char *argv[])
 
 	conv_arg.textview = GTK_TEXT_VIEW(gtk_builder_get_object(builder, "conv_log"));
 	conv_arg.stop_button = GTK_BUTTON(button_stop);
+
+	conv_arg.done_params.start_button = button_convert;
+	conv_arg.done_params.stop_button = button_stop;
 
 	conv_stop_arg.start_button = GTK_BUTTON(button_convert);
 	conv_stop_arg.conv_params = &conv_arg.conv_params;
