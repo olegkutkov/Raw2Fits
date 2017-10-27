@@ -11,6 +11,7 @@
 #include "raw2fits.h"
 
 static list_node_t *file_list = NULL;
+static int total_files_counter = 0;
 
 typedef struct thread_arg {
 	converter_params_t *conv_param;
@@ -28,6 +29,16 @@ void convert_one_file(char *file, void *arg)
 	raw2fits(file, params);
 
 	params->progress.progr_update(&params->progress);
+
+	task_enter_critical_section();
+
+	total_files_counter--;
+
+	if (total_files_counter == 0) {
+		params->complete(params->done_arg);
+	}
+
+	task_exit_critical_section();
 }
 
 void *thread_func(void *arg)
@@ -65,6 +76,11 @@ void convert_files(converter_params_t *params)
 		return;
 	}
 
+	if (file_list) {
+		free_list(file_list);
+		file_list = NULL;
+	}	
+
 	while ((ep = readdir(dp))) {
 		size_t inpath_len = strlen(params->inpath);
 		size_t fname_len = strlen(ep->d_name);
@@ -98,6 +114,7 @@ void convert_files(converter_params_t *params)
 	if (file_count == 0) {
 		params->logger_msg(params->logger_arg, "Can't find RAW files, sorry\n");
 		free_list(file_list);
+		file_list = NULL;
 		return;
 	}
 
@@ -117,6 +134,8 @@ void convert_files(converter_params_t *params)
 
 	params->logger_msg(params->logger_arg, "Total files to convert: %i\n", file_count);
 	params->logger_msg(params->logger_arg, "Files per CPU core: %i, left: %i\n", files_per_cpu_int, left_files);
+
+	total_files_counter = file_count;
 
 	init_thread_pool(cpucnt);
 	
@@ -143,7 +162,11 @@ void converter_stop(converter_params_t *params)
 {
 	params->converter_run = 0;
 
-	thread_pool_stop_tasks();
+	converter_cleanup();
+}
+
+void converter_cleanup()
+{
 	cleanup_thread_pool();
 
 	if (file_list) {
