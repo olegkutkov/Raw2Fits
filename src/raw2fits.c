@@ -210,7 +210,6 @@ void raw2fits(char *file, converter_params_t *arg)
 
 	if (!proc_img) {
 		print_error(arg, "Failed to make mem image", err);
-//		libraw_free_image(rawdata);
 		libraw_recycle(rawdata);
 		libraw_close(rawdata);
 		return;
@@ -221,14 +220,14 @@ void raw2fits(char *file, converter_params_t *arg)
 
 	set_metadata_from_raw(rawdata, proc_img, &arg->meta);
 
+	libraw_recycle(rawdata);
+	libraw_close(rawdata);
+
 	framebuf = (long *) malloc(proc_img->width * proc_img->height * sizeof(long));
 
 	if (!framebuf) {
 		arg->logger_msg(arg->logger_arg, "Failed to allocate memory for the frame, err: \n", strerror(err));
 		libraw_dcraw_clear_mem(proc_img);
-//		libraw_free_image(rawdata);
-		libraw_recycle(rawdata);
-		libraw_close(rawdata);
 	}
 
 	for (i = 0; i < proc_img->width * proc_img->height; i++) {
@@ -267,8 +266,6 @@ void raw2fits(char *file, converter_params_t *arg)
 
 	if (err != 0) {
 		arg->logger_msg(arg->logger_arg, "Failed to create file, error %i\n", err);
-		libraw_recycle(rawdata);
-		libraw_close(rawdata);
 		return;
 	}
 
@@ -278,8 +275,8 @@ void raw2fits(char *file, converter_params_t *arg)
 
 	if (err != 0) {
 		arg->logger_msg(arg->logger_arg, "Failed to write FITS header, error %i\n", err);
-		libraw_recycle(rawdata);
-		libraw_close(rawdata);
+		free(framebuf);
+		libraw_dcraw_clear_mem(proc_img);
 		return;
 	}
 
@@ -288,11 +285,7 @@ void raw2fits(char *file, converter_params_t *arg)
 	close_fits(fits);
 
 	free(framebuf);
-
 	libraw_dcraw_clear_mem(proc_img);
-//	libraw_free_image(rawdata);
-	libraw_recycle(rawdata);
-	libraw_close(rawdata);
 }
 
 /*
