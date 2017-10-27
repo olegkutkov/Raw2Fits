@@ -208,6 +208,7 @@ void raw2fits(char *file, converter_params_t *arg)
 
 	libraw_set_progress_handler(rawdata, &decoder_progress_callback, arg);
 
+
 	err = libraw_unpack(rawdata);
 
 	if (err != LIBRAW_SUCCESS) {
@@ -228,6 +229,10 @@ void raw2fits(char *file, converter_params_t *arg)
 		libraw_close(rawdata);
 		return;
 	}
+
+	rawdata->params.no_auto_bright = !arg->imsetup.apply_auto_bright;
+	rawdata->params.no_interpolation = !arg->imsetup.apply_interpolation;
+	rawdata->params.no_auto_scale = !arg->imsetup.apply_autoscale;
 
 	err = libraw_dcraw_process(rawdata);
 
