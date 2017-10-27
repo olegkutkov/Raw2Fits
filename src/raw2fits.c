@@ -151,6 +151,15 @@ int write_fits_header(fitsfile *fptr, file_metadata_t *meta)
 	return status;
 }
 
+int write_fits_image(fitsfile *fptr, long *frame, int width, int height)
+{
+	int status = 0;
+	long fpx[2] = { 1L, 1L };
+
+	fits_write_pix(fptr, TLONG, fpx, width * height, frame, &status);
+
+	return status;
+}
 
 void raw2fits(char *file, converter_params_t *arg)
 {
@@ -262,7 +271,7 @@ void raw2fits(char *file, converter_params_t *arg)
 
 		switch (arg->imsetup.mode) {
 			case GRAYSCALE:
-				framebuf[i] = red + green + blue;
+				framebuf[i] = (red + green + blue) / 3;
 				break;
 
 			case RED_ONLY:
@@ -307,6 +316,7 @@ void raw2fits(char *file, converter_params_t *arg)
 		return;
 	}
 
+	write_fits_image(fits, framebuf, proc_img->width, proc_img->height);
 
 	close_fits(fits);
 
