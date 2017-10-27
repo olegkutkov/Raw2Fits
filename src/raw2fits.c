@@ -134,7 +134,7 @@ int create_fits_image(fitsfile *fptr, int width, int height, int bitpixel)
 	return status;
 }
 
-int write_fits_header(fitsfile *fptr, file_metadata_t *meta)
+int write_fits_header(fitsfile *fptr, file_metadata_t *meta, char *add_comment)
 {
 	int status = 0;
 
@@ -147,6 +147,8 @@ int write_fits_header(fitsfile *fptr, file_metadata_t *meta)
 	fits_write_key(fptr, TFLOAT, "TEMPER", &meta->temperature, "Camera temperature in C", &status);
 	fits_write_key(fptr, TSTRING, "DATE", meta->date, "Date and time", &status);
 	fits_write_key(fptr, TSTRING, "NOTES", meta->note, "", &status);
+
+	fits_write_comment(fptr, add_comment, &status);
 
 	return status;
 }
@@ -307,7 +309,7 @@ void raw2fits(char *file, converter_params_t *arg)
 
 	err = create_fits_image(fits, proc_img->width, proc_img->height, proc_img->bits);
 
-	err = write_fits_header(fits, &arg->meta);
+	err = write_fits_header(fits, &arg->meta, "Average grayscale image");
 
 	if (err != 0) {
 		arg->logger_msg(arg->logger_arg, "Failed to write FITS header, error %i\n", err);
