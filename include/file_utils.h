@@ -34,7 +34,7 @@ long get_file_size(char *fname);
 int is_file_exist(char *filename);
 int remove_file(const char *filename);
 
-void make_target_fits_filename(converter_params_t *arg, char *raw_filename, char *out_filename);
+void make_target_fits_filename(converter_params_t *arg, char *raw_filename, char *out_filename, char *postfix);
 
 #endif
 

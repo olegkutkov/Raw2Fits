@@ -114,7 +114,7 @@ int is_file_exist(char *filename)
 	return (stat (filename, &buffer) == 0);
 }
 
-void make_target_fits_filename(converter_params_t *arg, char *raw_filename, char *out_filename)
+void make_target_fits_filename(converter_params_t *arg, char *raw_filename, char *out_filename, char *postfix)
 {
 	int iter = 0;
 	char *out_file_name_base, *obj, *datetime, *filter;
@@ -195,8 +195,8 @@ void make_target_fits_filename(converter_params_t *arg, char *raw_filename, char
 	}
 
 	strncpy(out_filename + outdir_len + 1, out_file_name_base, raw_filename_len);
-	strncpy(out_filename + outdir_len + 1 + raw_filename_len - 4, ".fits", 6);
-	out_filename[outdir_len + raw_filename_len + 2] = '\0';
+	strncpy(out_filename + outdir_len + 1 + raw_filename_len - 4, postfix, strlen(postfix));
+	out_filename[outdir_len + raw_filename_len + strlen(postfix)] = '\0';
 
 	for (; iter < strlen(out_filename); ++iter) {
 		if (out_filename[iter] == 0x20) {
