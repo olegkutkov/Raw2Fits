@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=.1
+Type=Application
+Name=Raw to Fits files converter
+GenericName=Raw2Fits converter
+Comment=Convert DSLR RAW images to the sciense FITS format
+Exec=raw2fits
+Icon=raw2fits.png
+Terminal=false
+Categories=Graphics;GTK;
+
