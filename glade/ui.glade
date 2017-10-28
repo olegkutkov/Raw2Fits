@@ -114,6 +114,9 @@ for Canon/Nikon/Sony/Fuji cameras</property>
       <row>
         <col id="0" translatable="yes">&lt;object&gt;_&lt;filter&gt;_&lt;datetime&gt;.fits</col>
       </row>
+      <row>
+        <col id="0" translatable="yes">&lt;RAW file name&gt;_&lt;datetime&gt;.fits</col>
+      </row>
     </data>
   </object>
   <object class="GtkApplicationWindow" id="window_main">
