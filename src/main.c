@@ -325,26 +325,17 @@ void button_convert_stop_clicked_cb(GtkButton *button, conv_stop_argument_t *arg
 	converter_stop(conv_params);
 }
 
-//void on_dialog_response
+void on_dialog_response(GtkWidget *obj)
+{
+	gtk_widget_hide(obj);
+}
 
 void button_about_clicked_cb(GtkButton *button, about_dialog_argument_t *arg)
 {
 	gtk_window_set_modal(GTK_WINDOW(arg->dlg), TRUE);
 	gtk_window_set_transient_for(GTK_WINDOW(arg->dlg), arg->main_window);
 
-	gtk_widget_show (GTK_WIDGET(arg->dlg));
-
-//	gtk_widget_hide (GTK_WIDGET(arg->dlg));
-
-//	g_signal_connect(arg->dlg, "response", G_CALLBACK (on_dialog_response), arg->dlg);
-
-//	int res = gtk_dialog_run(arg->dlg);
-
-//	printf("dlg res %i\n", res);
-
-//	if (gtk_dialog_run(arg->dlg) == 1) {
-//		gtk_widget_destroy(GTK_WIDGET(arg->dlg));
-//	}
+	gtk_widget_show(GTK_WIDGET(arg->dlg));
 }
 
 void on_window_main_destroy()
@@ -464,6 +455,8 @@ int main(int argc, char *argv[])
 	g_signal_connect(button_output_dir, "clicked", G_CALLBACK (button_out_dir_clicked_cb), &out_dlg_userdata);
 	g_signal_connect(button_convert, "clicked", G_CALLBACK (button_convert_clicked_cb), &conv_arg);
 	g_signal_connect(button_stop, "clicked", G_CALLBACK (button_convert_stop_clicked_cb), &conv_stop_arg);
+
+	g_signal_connect(about_window, "response", G_CALLBACK (on_dialog_response), about_window);
 
 	about_dlg_userdata.main_window = GTK_WINDOW(window);
 	about_dlg_userdata.dlg = GTK_DIALOG(about_window);
