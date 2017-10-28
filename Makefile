@@ -19,8 +19,9 @@
 
 CC := gcc 
 PROGRAM = raw2fits
+DEBUG := -g -ggdb
 
-CFLAGS := -Wall -g -ggdb -pipe -I./include
+CFLAGS := -Wall -O2 -pipe -I./include -I/usr/include/cfitsio # $(DEBUG)
 
 GTKLIB=`pkg-config --cflags --libs gtk+-3.0`
 
