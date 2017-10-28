@@ -27,6 +27,27 @@
 #include "file_utils.h"
 #include "raw2fits.h"
 
+static char *FILENAME_CHANNEL_POSTFIX[3] = {
+	"_RED.fits\0",
+	"_GREEN.fits\0",
+	"_BLUE.fits\0"
+};
+
+static FRAME_MODE FRAME_COPY_MODES[3] = {
+	RED_ONLY,
+	GREEN_ONLY,
+	BLUE_ONLY
+};
+
+static char *FITS_HEADER_COMMENT[6] = {
+	"Average grayscale",
+	"All channels by files",
+	"All channels in one file",
+	"RED channel",
+	"GREEN channel",
+	"BLUE channel"
+};
+
 static int decoder_progress_callback(void *data, enum LibRaw_progress p,int iteration, int expected)
 {
 	converter_params_t *params = (converter_params_t *) data;
@@ -127,6 +148,41 @@ int write_fits_header(fitsfile *fptr, file_metadata_t *meta, char *add_comment)
 	return status;
 }
 
+void copy_image_buf(FRAME_MODE mode, libraw_processed_image_t *proc_img, long **dst)
+{
+	int i, k = 0;
+	long rgb[3];
+
+	for (i = 0; i < proc_img->width * proc_img->height; i++) {
+		rgb[0] = proc_img->data[k];
+		rgb[1] = proc_img->data[k + 1];
+		rgb[2] = proc_img->data[k + 2];
+
+		switch (mode) {
+			case GRAYSCALE:
+				(*dst)[i] = (rgb[0] + rgb[1] + rgb[3]) / 3;
+				break;
+
+			case RED_ONLY:
+				(*dst)[i] = rgb[0];
+				break;
+
+			case GREEN_ONLY:
+				(*dst)[i] = rgb[1];
+				break;
+
+			case BLUE_ONLY:
+				(*dst)[i] = rgb[2];
+				break;
+
+			default:
+				break;
+		}
+
+		k += 3;
+	}
+}
+
 int write_fits_image(fitsfile *fptr, long *frame, int width, int height)
 {
 	int status = 0;
@@ -143,11 +199,11 @@ void raw2fits(char *file, converter_params_t *arg)
 	libraw_data_t *rawdata;
 	libraw_processed_image_t *proc_img;
 	char target_filename[512];
+	size_t target_filename_len;
 	fitsfile *fits;
 	long *framebuf;
-	int i, err, k = 0;
+	int i, err;
 	int target_file_exists = 0;
-	long red, green, blue;
 
 	rawdata = libraw_init(0);
 
@@ -251,59 +307,101 @@ void raw2fits(char *file, converter_params_t *arg)
 		libraw_dcraw_clear_mem(proc_img);
 	}
 
-	for (i = 0; i < proc_img->width * proc_img->height; i++) {
-		red = proc_img->data[k];
-		green = proc_img->data[k + 1];
-		blue = proc_img->data[k + 2];
+	if (arg->imsetup.mode == ALL_CHANNELS_BY_FILES) {
+		target_filename_len = strlen(target_filename);
 
-		switch (arg->imsetup.mode) {
-			case GRAYSCALE:
-				framebuf[i] = (red + green + blue) / 3;
-				break;
+		for (i = 0; i < 3; i++) {
+			strcpy(target_filename + target_filename_len - 5, FILENAME_CHANNEL_POSTFIX[i]);
+			/* at this point we need to check file exists again... */
 
-			case RED_ONLY:
-				framebuf[i] = red;
-				break;
+			target_file_exists = is_file_exist(target_filename);
 
-			case GREEN_ONLY:
-				framebuf[i] = green;
-				break;
+			if (target_file_exists) {
+				if (!arg->fsetup.overwrite) {
+					arg->logger_msg(arg->logger_arg, "File %s is already exists, skipping...\n", target_filename);
+					continue;
+				}
 
-			case BLUE_ONLY:
-				framebuf[i] = blue;
-				break;
+				if (remove_file(target_filename) < 0) {
+					arg->logger_msg(arg->logger_arg, "Unable to remove old file %s, error: \n", strerror(errno));
+					continue;
+				}
+			}
 
-			case ALL_CHANNELS_BY_FILES:
-			case ALL_CHANNELS:
-				break;
+			arg->logger_msg(arg->logger_arg, "Creating FITS %s\n", target_filename);
+
+			err = create_new_fits(&fits, target_filename);
+
+			if (err != 0) {
+				arg->logger_msg(arg->logger_arg, "Failed to create file, error %i\n", err);
+				continue;
+			}
+
+			err = create_fits_image(fits, proc_img->width, proc_img->height, proc_img->bits);
+			err = write_fits_header(fits, &arg->meta, FITS_HEADER_COMMENT[i + 3]);
+
+			if (err != 0) {
+				arg->logger_msg(arg->logger_arg, "Failed to write FITS header, error %i\n", err);
+				continue;
+			}
+
+			copy_image_buf(FRAME_COPY_MODES[i], proc_img, &framebuf);
+
+			write_fits_image(fits, framebuf, proc_img->width, proc_img->height);
+
+			close_fits(fits);
+
 		}
 
-		k += 3;
+	} else if (arg->imsetup.mode == ALL_CHANNELS) {
+		arg->logger_msg(arg->logger_arg, "Creating multi-image FITS %s\n", target_filename);
+
+		err = create_new_fits(&fits, target_filename);
+
+		if (err != 0) {
+			arg->logger_msg(arg->logger_arg, "Failed to create file, error %i\n", err);
+			free(framebuf);
+			libraw_dcraw_clear_mem(proc_img);
+			return;
+		}
+
+		for (i = 0; i < 3; i++) {
+			copy_image_buf(FRAME_COPY_MODES[i], proc_img, &framebuf);
+			err = create_fits_image(fits, proc_img->width, proc_img->height, proc_img->bits);
+			err = write_fits_header(fits, &arg->meta, FITS_HEADER_COMMENT[i + 3]);
+			write_fits_image(fits, framebuf, proc_img->width, proc_img->height);
+		}
+
+		close_fits(fits);
+
+	} else {
+		arg->logger_msg(arg->logger_arg, "Creating FITS %s\n", target_filename);
+
+		err = create_new_fits(&fits, target_filename);
+
+		if (err != 0) {
+			arg->logger_msg(arg->logger_arg, "Failed to create file, error %i\n", err);
+			free(framebuf);
+			libraw_dcraw_clear_mem(proc_img);
+			return;
+		}
+
+		err = create_fits_image(fits, proc_img->width, proc_img->height, proc_img->bits);
+		err = write_fits_header(fits, &arg->meta, FITS_HEADER_COMMENT[arg->imsetup.mode]);
+
+		if (err != 0) {
+			arg->logger_msg(arg->logger_arg, "Failed to write FITS header, error %i\n", err);
+			free(framebuf);
+			libraw_dcraw_clear_mem(proc_img);
+			return;
+		}
+
+		copy_image_buf(arg->imsetup.mode, proc_img, &framebuf);
+
+		write_fits_image(fits, framebuf, proc_img->width, proc_img->height);
+
+		close_fits(fits);
 	}
-
-	arg->logger_msg(arg->logger_arg, "Creating FITS %s\n", target_filename);
-
-	err = create_new_fits(&fits, target_filename);
-
-	if (err != 0) {
-		arg->logger_msg(arg->logger_arg, "Failed to create file, error %i\n", err);
-		return;
-	}
-
-	err = create_fits_image(fits, proc_img->width, proc_img->height, proc_img->bits);
-
-	err = write_fits_header(fits, &arg->meta, "Average grayscale image");
-
-	if (err != 0) {
-		arg->logger_msg(arg->logger_arg, "Failed to write FITS header, error %i\n", err);
-		free(framebuf);
-		libraw_dcraw_clear_mem(proc_img);
-		return;
-	}
-
-	write_fits_image(fits, framebuf, proc_img->width, proc_img->height);
-
-	close_fits(fits);
 
 	free(framebuf);
 	libraw_dcraw_clear_mem(proc_img);
