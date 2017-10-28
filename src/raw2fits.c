@@ -27,7 +27,10 @@
 #include "file_utils.h"
 #include "raw2fits.h"
 
-static char *FILENAME_CHANNEL_POSTFIX[3] = {
+static char *FILENAME_CHANNEL_POSTFIX[6] = {
+	"_AVG_GRAY.fits\0",
+	".fits\0",
+	"_RGB.fits\0",
 	"_RED.fits\0",
 	"_GREEN.fits\0",
 	"_BLUE.fits\0"
@@ -198,7 +201,7 @@ void raw2fits(char *file, converter_params_t *arg)
 	libraw_decoder_info_t decoder_info;
 	libraw_data_t *rawdata;
 	libraw_processed_image_t *proc_img;
-	char target_filename[512];
+	char target_filename[512] = { 0 };
 	size_t target_filename_len;
 	fitsfile *fits;
 	long *framebuf;
@@ -232,23 +235,26 @@ void raw2fits(char *file, converter_params_t *arg)
 
 	set_metadata_from_raw(rawdata, &arg->meta);
 
-	make_target_fits_filename(arg, file, target_filename);
+	make_target_fits_filename(arg, file, target_filename, FILENAME_CHANNEL_POSTFIX[arg->imsetup.mode]);
 
 	target_file_exists = is_file_exist(target_filename);
 
-	if (target_file_exists) {
-		if (!arg->fsetup.overwrite) {
-			arg->logger_msg(arg->logger_arg, "File %s is already exists, skipping...\n", target_filename);
-			libraw_recycle(rawdata);
-			libraw_close(rawdata);
-			return;
-		}
+	if (arg->imsetup.mode != ALL_CHANNELS_BY_FILES)
+	{
+		if (target_file_exists) {
+			if (!arg->fsetup.overwrite) {
+				arg->logger_msg(arg->logger_arg, "File %s is already exists, skipping...\n", target_filename);
+				libraw_recycle(rawdata);
+				libraw_close(rawdata);
+				return;
+			}
 
-		if (remove_file(target_filename) < 0) {
-			arg->logger_msg(arg->logger_arg, "Unable to remove old file %s, error: \n", strerror(errno));
-			libraw_recycle(rawdata);
-			libraw_close(rawdata);
-			return;
+			if (remove_file(target_filename) < 0) {
+				arg->logger_msg(arg->logger_arg, "Unable to remove old file %s, error: \n", strerror(errno));
+				libraw_recycle(rawdata);
+				libraw_close(rawdata);
+				return;
+			}
 		}
 	}
 
@@ -311,7 +317,7 @@ void raw2fits(char *file, converter_params_t *arg)
 		target_filename_len = strlen(target_filename);
 
 		for (i = 0; i < 3; i++) {
-			strcpy(target_filename + target_filename_len - 5, FILENAME_CHANNEL_POSTFIX[i]);
+			strcpy(target_filename + target_filename_len - 5, FILENAME_CHANNEL_POSTFIX[i + 3]);
 			/* at this point we need to check file exists again... */
 
 			target_file_exists = is_file_exist(target_filename);
