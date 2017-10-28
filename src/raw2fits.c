@@ -160,7 +160,7 @@ void copy_image_buf(FRAME_MODE mode, libraw_processed_image_t *proc_img, long **
 
 		switch (mode) {
 			case GRAYSCALE:
-				(*dst)[i] = (rgb[0] + rgb[1] + rgb[3]) / 3;
+				(*dst)[i] = (rgb[0] + rgb[1] + rgb[2]) / 3;
 				break;
 
 			case RED_ONLY:
