@@ -33,7 +33,8 @@ typedef enum frame_mode {
 typedef enum file_naming {
 	RAW_NAME = 0,
 	OBJECT_DATETIME,
-	OBJECT_FILTER_DATETIME
+	OBJECT_FILTER_DATETIME,
+	RAW_DATETIME
 } file_naming_t;
 
 typedef struct file_metadata {
