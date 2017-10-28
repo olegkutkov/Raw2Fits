@@ -1,4 +1,4 @@
-# change application name here (executable output name)
+
 
 CC := gcc 
 PROGRAM = raw2fits
@@ -17,6 +17,24 @@ all: $(PROGRAM)
 
 $(PROGRAM): $(OBJECTS)
 	$(CC) $(CFLAGS) $(SRC) $(LDFLAG) -o $(PROGRAM)
+
+install:
+	mkdir -p /usr/share/raw2fits/
+	cp -f glade/ui.glade /usr/share/raw2fits/
+	cp -f desktop/raw2fits.desktop /usr/share/applications/
+	cp -f glade/raw2fits_48x48.png /usr/share/raw2fits/
+	cp -f glade/raw2fits_128x128.png /usr/share/raw2fits/
+	cp -f glade/raw2fits_48x48.png /usr/share/pixmaps/raw2fits.png
+	cp -f raw2fits /usr/bin
+
+uninstall:
+	rm -f /usr/bin/raw2fits
+	rm -f /usr/share/pixmaps/raw2fits.png
+	rm -f /usr/share/applications/raw2fits.desktop
+	rm -f /usr/share/raw2fits/raw2fits_48x48.png
+	rm -f /usr/share/raw2fits/raw2fits_128x128.png
+	rm -f /usr/share/raw2fits/ui.glade
+	rm -fr /usr/share/raw2fits/
 
 clean:
 	rm -fr $(PROGRAM) $(PROGRAM).o
