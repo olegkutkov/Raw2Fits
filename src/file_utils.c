@@ -134,6 +134,24 @@ void make_target_fits_filename(converter_params_t *arg, char *raw_filename, char
 
 			break;
 
+		case RAW_DATETIME:
+			if (strlen(arg->meta.date) > 0) {
+				datetime = arg->meta.date;
+			} else {
+				datetime = "NO_DATE";
+			}
+
+			datetime_len = strlen(datetime);
+
+			out_file_name_base = (char *) malloc(raw_filename_len + datetime_len + 4);
+			strncpy(out_file_name_base, base_raw_filename, raw_filename_len - 3);
+			strncpy(out_file_name_base + raw_filename_len - 4, "_", 1);
+			strcpy(out_file_name_base + raw_filename_len - 3, datetime);
+
+			raw_filename_len = raw_filename_len + datetime_len + 1;
+
+			break;
+
 		case OBJECT_DATETIME:
 			if (strlen(arg->meta.object) > 0) {
 				obj = arg->meta.object;
