@@ -79,6 +79,10 @@ void set_metadata_from_raw(libraw_data_t *rawdata, file_metadata_t *dst_meta)
 	struct tm *utc_tm;
 	char time_buf[25];
 
+#if !(LIBRAW_COMPILE_CHECK_VERSION_NOTLESS(0,17))
+	#pragma message ("LibRaw version <= 0.17. Metadata extraction may not work properly")
+#endif
+
 	if ((strlen(dst_meta->instrument) == 0) || dst_meta->overwrite_instrument) {
 		tmplen = strlen(rawdata->idata.make);
 		strcpy(dst_meta->instrument, rawdata->idata.make);
@@ -271,9 +275,13 @@ void raw2fits(char *file, converter_params_t *arg)
 		return;
 	}
 
+#if (LIBRAW_COMPILE_CHECK_VERSION_NOTLESS(0,17))
 	rawdata->params.no_auto_bright = !arg->imsetup.apply_auto_bright;
 	rawdata->params.no_interpolation = !arg->imsetup.apply_interpolation;
 	rawdata->params.no_auto_scale = !arg->imsetup.apply_autoscale;
+#else
+	#pragma message ("LibRaw version is to old, unable to use image corrections")
+#endif
 
 	err = libraw_dcraw_process(rawdata);
 
