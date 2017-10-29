@@ -148,18 +148,33 @@ int write_fits_header(fitsfile *fptr, file_metadata_t *meta, char *add_comment)
 {
 	int status = 0;
 	char time_now[25];
+	float cpix1 = (meta->width + 1) / 2;
+	float cpix2 = (meta->height + 1) / 2;
 
 	get_current_datetime(time_now);
 
 	fits_write_key(fptr, TSTRING, "CREATOR", "raw2fits converter", "", &status);
 	fits_write_key(fptr, TSTRING, "DATE", time_now, "Fits creation date, UTC", &status);
-	fits_write_key(fptr, TSTRING, "OBJECT", meta->object, "Name of the object observed", &status);
+	fits_write_key(fptr, TSTRING, "OBJECT", meta->object, "Name of the object observed", &status);	
+	fits_write_key(fptr, TSTRING, "CTYPE1", "RA---TAN", "RA in tangent plane projection", &status);
+	fits_write_key(fptr, TSTRING, "CTYPE2", "DEC--TAN", "DEC in tangent plane projection", &status);
+	fits_write_key(fptr, TFLOAT, "CRPIX1", &cpix1, "The reference pixel coordinate 1", &status);
+	fits_write_key(fptr, TFLOAT, "CRPIX2", &cpix2, "The reference pixel coordinate 2", &status);
+	fits_write_key(fptr, TFLOAT, "CRVAL1", &meta->ra_coord, "RA at reference pixel in degrees", &status);
+	fits_write_key(fptr, TFLOAT, "CRVAL1", &meta->dec_coord, "DEC at reference pixel in degrees", &status);
+
+// TODO: calculate and store CDELTx
+//	fits_write_key(fptr, TFLOAT, "CDELT1", &pixel, "Coordinate increment per pixel in DEGREES/PIXEL", &status);
+//	fits_write_key(fptr, TFLOAT, "CDELT2", &pixel, "Coordinate increment per pixel in DEGREES/PIXEL", &status);
+
 	fits_write_key(fptr, TSTRING, "TELESCOP", meta->telescope, "Telescope", &status);
 	fits_write_key(fptr, TSTRING, "INSTRUME", meta->instrument, "Detector type", &status);
 	fits_write_key(fptr, TSTRING, "DATE-OBS", meta->date, "Observation date and time, UTC", &status);
 	fits_write_key(fptr, TFLOAT, "EXPTIME", &meta->exptime, "Exposure time in seconds", &status);
 	fits_write_key(fptr, TSTRING, "FILTER", meta->filter, "Filter used when taking image", &status);
 	fits_write_key(fptr, TSTRING, "OBSERVER", meta->observer, "", &status);
+	fits_write_key(fptr, TFLOAT, "RA", &meta->ra_coord, "Object Right Ascension", &status);
+	fits_write_key(fptr, TFLOAT, "DEC", &meta->dec_coord, "Object Declination", &status);
 	fits_write_key(fptr, TFLOAT, "TEMPER", &meta->temperature, "Camera temperature in C", &status);
 	fits_write_key(fptr, TSTRING, "NOTES", meta->note, "", &status);
 
