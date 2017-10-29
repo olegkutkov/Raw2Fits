@@ -30,6 +30,6 @@ Raw2Fits was successfully tested with raw files of this cameras vendors and mode
 - Hasselblad CFV
 
 # Usage
-Please check out documentation: https://github.com/olegkutkov/Raw2Fits/doc/raw2fits.pdf
+Please check out documentation: https://github.com/olegkutkov/Raw2Fits/blob/master/doc/raw2fits.pdf
 
 ![](https://raw.githubusercontent.com/olegkutkov/Raw2Fits/master/doc/raw2fits_screenshot.png)
