@@ -155,7 +155,7 @@ int write_fits_header(fitsfile *fptr, file_metadata_t *meta, char *add_comment)
 
 	fits_write_key(fptr, TSTRING, "CREATOR", "raw2fits converter", "", &status);
 	fits_write_key(fptr, TSTRING, "DATE", time_now, "Fits creation date, UTC", &status);
-	fits_write_key(fptr, TSTRING, "OBJECT", meta->object, "Name of the object observed", &status);	
+	fits_write_key(fptr, TSTRING, "OBJECT", meta->object, "Name of the object observed", &status);
 	fits_write_key(fptr, TSTRING, "CTYPE1", "RA---TAN", "RA in tangent plane projection", &status);
 	fits_write_key(fptr, TSTRING, "CTYPE2", "DEC--TAN", "DEC in tangent plane projection", &status);
 	fits_write_key(fptr, TFLOAT, "CRPIX1", &cpix1, "The reference pixel coordinate 1", &status);
