@@ -43,6 +43,8 @@ typedef struct file_metadata {
 	unsigned int height;
 	float exptime;
 	float temperature;
+	float ra_coord;
+	float dec_coord;
 	char overwrite_instrument;
 	char overwrite_observer;
 	char overwrite_exptime;
