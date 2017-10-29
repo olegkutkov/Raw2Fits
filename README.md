@@ -1,6 +1,6 @@
 Raw2Fits
 ==
-Convert digital cameras RAW to scientific format FITS
+Convert digital camera's RAW files to the scientific FITS format
 
 Author: Oleg Kutkov <elenbert@gmail.com>, 
 Crimean astrophysical observatory.
