@@ -98,7 +98,7 @@ void set_metadata_from_raw(libraw_data_t *rawdata, file_metadata_t *dst_meta)
 
 	if ((strlen(dst_meta->date) == 0) || dst_meta->overwrite_date) {
 		utc_tm = gmtime(&rawdata->other.timestamp);
-		strftime(time_buf, 25, "%Y-%m-%d %H:%M:%S", utc_tm);
+		strftime(time_buf, 25, "%Y-%m-%dT%H:%M:%S", utc_tm);
 		strcpy(dst_meta->date, time_buf);
 		dst_meta->overwrite_date = 1;
 	}
@@ -136,18 +136,31 @@ int create_fits_image(fitsfile *fptr, int width, int height, int bitpixel)
 	return status;
 }
 
+void get_current_datetime(char *dst)
+{
+	time_t lt = time(NULL);
+	struct tm *utc_tm = gmtime(&lt);
+
+	strftime(dst, 25, "%Y-%m-%dT%H:%M:%S", utc_tm);
+}
+
 int write_fits_header(fitsfile *fptr, file_metadata_t *meta, char *add_comment)
 {
 	int status = 0;
+	char time_now[25];
 
-	fits_write_key(fptr, TSTRING, "OBJECT", meta->object, "", &status);
-	fits_write_key(fptr, TSTRING, "OBSERVER", meta->observer, "", &status);
-	fits_write_key(fptr, TSTRING, "TELESCOP", meta->telescope, "", &status);
-	fits_write_key(fptr, TSTRING, "INSTRUME", meta->instrument, "", &status);
-	fits_write_key(fptr, TSTRING, "FILTER", meta->filter, "Filter used when taking image", &status);
+	get_current_datetime(time_now);
+
+	fits_write_key(fptr, TSTRING, "CREATOR", "raw2fits converter", "", &status);
+	fits_write_key(fptr, TSTRING, "DATE", time_now, "Fits creation date, UTC", &status);
+	fits_write_key(fptr, TSTRING, "OBJECT", meta->object, "Name of the object observed", &status);
+	fits_write_key(fptr, TSTRING, "TELESCOP", meta->telescope, "Telescope", &status);
+	fits_write_key(fptr, TSTRING, "INSTRUME", meta->instrument, "Detector type", &status);
+	fits_write_key(fptr, TSTRING, "DATE-OBS", meta->date, "Observation date and time, UTC", &status);
 	fits_write_key(fptr, TFLOAT, "EXPTIME", &meta->exptime, "Exposure time in seconds", &status);
+	fits_write_key(fptr, TSTRING, "FILTER", meta->filter, "Filter used when taking image", &status);
+	fits_write_key(fptr, TSTRING, "OBSERVER", meta->observer, "", &status);
 	fits_write_key(fptr, TFLOAT, "TEMPER", &meta->temperature, "Camera temperature in C", &status);
-	fits_write_key(fptr, TSTRING, "DATE", meta->date, "Date and time", &status);
 	fits_write_key(fptr, TSTRING, "NOTES", meta->note, "", &status);
 
 	fits_write_comment(fptr, add_comment, &status);
