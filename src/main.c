@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include "converter.h"
+#include "coords_calc.h"
 
 static char *RAW_PATH = NULL;
 static char *OUT_PATH = NULL;
@@ -63,6 +64,8 @@ typedef struct conv_start_argument {
 	GtkEntry *entry_observer;
 	GtkEntry *entry_notes;
 	GtkEntry *entry_date;
+	GtkEntry *entry_ra_coord;
+	GtkEntry *entry_dec_coord;
 	converter_params_t conv_params;
 	done_cb_argument_t done_params;
 	GtkTextBuffer *logger;
@@ -278,6 +281,9 @@ void button_convert_clicked_cb(GtkButton *button, conv_start_argument_t *arg)
 	conv_params->meta.exptime = atof(gtk_entry_get_text(arg->entry_exposure));
 	conv_params->meta.temperature = atof(gtk_entry_get_text(arg->entry_temperature));
 
+	conv_params->meta.ra_coord = coord_any_to_float_deg(gtk_entry_get_text(arg->entry_ra_coord));
+	conv_params->meta.dec_coord = coord_any_to_float_deg(gtk_entry_get_text(arg->entry_dec_coord));
+
 	conv_params->imsetup.mode = gtk_combo_box_get_active(arg->combobox_color);
 
 	conv_params->fsetup.naming = gtk_combo_box_get_active(arg->combobox_filenaming);
@@ -411,6 +417,8 @@ int main(int argc, char *argv[])
 	conv_arg.entry_observer = GTK_ENTRY(gtk_builder_get_object(builder, "entry_observer"));
 	conv_arg.entry_notes = GTK_ENTRY(gtk_builder_get_object(builder, "entry_notes"));
 	conv_arg.entry_date = GTK_ENTRY(gtk_builder_get_object(builder, "entry_date"));
+	conv_arg.entry_ra_coord = GTK_ENTRY(gtk_builder_get_object(builder, "entry_ra"));
+	conv_arg.entry_dec_coord = GTK_ENTRY(gtk_builder_get_object(builder, "entry_dec"));
 	conv_arg.combobox_color = GTK_COMBO_BOX(gtk_builder_get_object(builder, "combobox_color"));
 	conv_arg.combobox_filenaming = GTK_COMBO_BOX(gtk_builder_get_object(builder, "combobox_outfilename"));
 
