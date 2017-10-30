@@ -26,6 +26,7 @@
 #include <time.h>
 #include "file_utils.h"
 #include "raw2fits.h"
+#include "coords_calc.h"
 
 static char *FILENAME_CHANNEL_POSTFIX[6] = {
 	"_AVG_GRAY.fits\0",
@@ -150,6 +151,7 @@ int write_fits_header(fitsfile *fptr, file_metadata_t *meta, char *add_comment)
 	char time_now[25];
 	float cpix1 = (meta->width + 1) / 2;
 	float cpix2 = (meta->height + 1) / 2;
+	char coord_buf[15];
 
 	get_current_datetime(time_now);
 
@@ -173,8 +175,13 @@ int write_fits_header(fitsfile *fptr, file_metadata_t *meta, char *add_comment)
 	fits_write_key(fptr, TFLOAT, "EXPTIME", &meta->exptime, "Exposure time in seconds", &status);
 	fits_write_key(fptr, TSTRING, "FILTER", meta->filter, "Filter used when taking image", &status);
 	fits_write_key(fptr, TSTRING, "OBSERVER", meta->observer, "", &status);
-	fits_write_key(fptr, TFLOAT, "RA", &meta->ra_coord, "Object Right Ascension", &status);
-	fits_write_key(fptr, TFLOAT, "DEC", &meta->dec_coord, "Object Declination", &status);
+
+	deg_to_sexigesimal_str(meta->ra_coord, coord_buf);
+	fits_write_key(fptr, TSTRING, "RA", coord_buf, "Object Right Ascension", &status);
+
+	deg_to_sexigesimal_str(meta->dec_coord, coord_buf);
+	fits_write_key(fptr, TSTRING, "DEC", coord_buf, "Object Declination", &status);
+
 	fits_write_key(fptr, TFLOAT, "TEMPER", &meta->temperature, "Camera temperature in C", &status);
 	fits_write_key(fptr, TSTRING, "NOTES", meta->note, "", &status);
 
