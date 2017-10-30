@@ -18,8 +18,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  
  */
 
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
 #include "coords_calc.h"
 
 static float parse_sexigesimal_str(const char *str)
@@ -68,5 +70,21 @@ float coord_any_to_float_deg(const char *str)
 	}
 
 	return 0;
+}
+
+inline double frac(const double x)
+{
+	return x - floor(x);
+}
+
+void deg_to_sexigesimal_str(float deg, char *dst)
+{
+	char buf[15] = { 0 };	
+	int hour = deg / 15;
+	int min = abs((int)(frac(deg / 15) * 60));
+	float sec = abs((int)(frac(frac(deg / 15) * 60) * 60));
+
+	snprintf(buf, 14, "%i:%i:%.5f", hour, min, sec);
+	strcpy(dst, buf);
 }
 
