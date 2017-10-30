@@ -80,9 +80,20 @@ inline double frac(const double x)
 void deg_to_sexigesimal_str(float deg, char *dst)
 {
 	char buf[15] = { 0 };	
-	int hour = deg / 15;
-	int min = abs((int)(frac(deg / 15) * 60));
-	float sec = abs((int)(frac(frac(deg / 15) * 60) * 60));
+
+	int hour = (int) deg;
+	int min = (int) ((deg - hour) * 60);
+
+	double min_frac = (double)min / 60;
+	double sec = (deg - hour - min_frac) * 3600;
+
+	if (min < 0) {
+		min *= -1;
+	}
+
+	if (sec < 0) {
+		sec *= -1;
+	}
 
 	snprintf(buf, 14, "%i:%i:%.5f", hour, min, sec);
 	strcpy(dst, buf);
