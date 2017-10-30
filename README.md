@@ -34,7 +34,7 @@ Raw2Fits was successfully tested with raw files of this cameras vendors and mode
 - Nikon D5300
 - Fujifilm X series
 - Pentax K-7
-- Konika-Minolta dimage A200
+- Konica-Minolta dimage A200
 - Sony Alpha and ILCA series
 - Hasselblad CFV
 
@@ -42,3 +42,6 @@ Raw2Fits was successfully tested with raw files of this cameras vendors and mode
 Please check out documentation: https://github.com/olegkutkov/Raw2Fits/blob/master/doc/raw2fits.pdf
 
 ![](https://raw.githubusercontent.com/olegkutkov/Raw2Fits/master/doc/raw2fits_screenshot.png)
+
+#
+![](https://raw.githubusercontent.com/olegkutkov/Raw2Fits/master/doc/fits_header.png)
