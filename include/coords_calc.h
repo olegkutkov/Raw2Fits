@@ -21,6 +21,7 @@
 #define __COORDS_CALC_H__
 
 float coord_any_to_float_deg(const char *str);
+void deg_to_sexigesimal_str(float deg, char *dst);
 
 #endif
 
