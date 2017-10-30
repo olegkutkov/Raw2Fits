@@ -18,7 +18,7 @@
     <property name="deletable">False</property>
     <property name="gravity">center</property>
     <property name="program_name">Raw2Fits</property>
-    <property name="version">0.1</property>
+    <property name="version">0.2</property>
     <property name="copyright" translatable="yes">
 Kutkov Oleg, 2017
 Crimean astrophysical observatory
