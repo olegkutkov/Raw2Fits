@@ -1,3 +1,9 @@
 
 ****
- October 2017: version 0.1 - initial version
+ 29 October 2017: version 0.1 - initial version
+
+***
+ 30 October 2017: version 0.2
+	- more correct FITS header
+	- new UI inputs for RA and DEC of the object
+	- write RA, DEC and reference point to the FITS header
