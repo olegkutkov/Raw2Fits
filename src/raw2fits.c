@@ -61,7 +61,7 @@ static int decoder_progress_callback(void *data, enum LibRaw_progress p,int iter
 	return !params->converter_run;
 }
 
-inline void print_error(converter_params_t *arg, char *err_where, int err)
+static void print_error(converter_params_t *arg, char *err_where, int err)
 {
 	const char *err_descr;
 
@@ -110,7 +110,7 @@ void set_metadata_from_raw(libraw_data_t *rawdata, file_metadata_t *dst_meta)
 	}
 }
 
-inline int create_new_fits(fitsfile **fptr, char *filename)
+static int create_new_fits(fitsfile **fptr, char *filename)
 {
 	int status = 0;
 	fits_create_file(fptr, filename, &status);
