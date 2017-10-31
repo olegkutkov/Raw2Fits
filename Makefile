@@ -19,6 +19,8 @@
 
 CC := gcc 
 PROGRAM = raw2fits
+PROGRAM_CLI = raw2fits-cli
+
 DEBUG := -g -ggdb
 
 CFLAGS := -Wall -O2 -pipe -I./include -I/usr/include/cfitsio #$(DEBUG)
@@ -29,13 +31,24 @@ LIBRAW := -L/usr/lib -lraw
 
 LDFLAG := $(GTKLIB) $(LIBRAW) -lm -lcfitsio -export-dynamic -pthread
 
-SRC := src/main.c src/converter.c src/list.c src/file_utils.c \
+SRC_COMMON := src/converter.c src/list.c src/file_utils.c \
 		src/thread_pool.c src/raw2fits.c src/coords_calc.c
+
+SRC_UI := src/main.c
+
+SRC_CLI := src/main_cli.c
 
 all: $(PROGRAM)
 
 $(PROGRAM): $(OBJECTS)
-	$(CC) $(CFLAGS) $(SRC) $(LDFLAG) -o $(PROGRAM)
+	$(CC) $(CFLAGS) $(SRC_COMMON) $(SRC_UI) $(LDFLAG) -o $(PROGRAM)
+
+
+cli: $(PROGRAM_CLI)
+
+$(PROGRAM_CLI): $(OBJECTS)
+	$(CC) $(CFLAGS) $(SRC_COMMON) $(SRC_CLI) $(LDFLAG) -o $(PROGRAM_CLI)
+
 
 install:
 	mkdir -p /usr/share/raw2fits/
