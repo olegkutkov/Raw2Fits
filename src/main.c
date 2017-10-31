@@ -25,6 +25,7 @@
 #include <stdarg.h>
 #include "converter.h"
 #include "coords_calc.h"
+#include "version.h"
 
 static char *RAW_PATH = NULL;
 static char *OUT_PATH = NULL;
@@ -362,6 +363,15 @@ void show_error(char *text) {
 	gtk_widget_destroy(dialog);
 }
 
+static void set_about_version(GtkWidget *about_dlg)
+{
+	char version_str[10];
+
+	snprintf(version_str, 10, "%i.%i.%i", RAW2FITS_VERSION_MAJOR, RAW2FITS_VERSION_MINOR, RAW2FITS_VERSION_PATCH);
+
+	gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(about_dlg), version_str);
+}
+
 int main(int argc, char *argv[])
 {
 	GError *err = NULL;
@@ -399,6 +409,8 @@ int main(int argc, char *argv[])
 
 	window = GTK_WIDGET(gtk_builder_get_object(builder, "window_main"));
 	about_window = GTK_WIDGET(gtk_builder_get_object(builder, "aboutdialog"));
+
+	set_about_version(about_window);
 
 	cr2_dir_label = GTK_WIDGET(gtk_builder_get_object(builder, "cr2_dir_label"));
 	out_dir_label = GTK_WIDGET(gtk_builder_get_object(builder, "out_dir_label"));
