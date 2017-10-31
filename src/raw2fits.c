@@ -163,7 +163,7 @@ int write_fits_header(fitsfile *fptr, file_metadata_t *meta, char *add_comment)
 	fits_write_key(fptr, TFLOAT, "CRPIX1", &cpix1, "The reference pixel coordinate 1", &status);
 	fits_write_key(fptr, TFLOAT, "CRPIX2", &cpix2, "The reference pixel coordinate 2", &status);
 	fits_write_key(fptr, TFLOAT, "CRVAL1", &meta->ra_coord, "RA at reference pixel in degrees", &status);
-	fits_write_key(fptr, TFLOAT, "CRVAL1", &meta->dec_coord, "DEC at reference pixel in degrees", &status);
+	fits_write_key(fptr, TFLOAT, "CRVAL2", &meta->dec_coord, "DEC at reference pixel in degrees", &status);
 
 // TODO: calculate and store CDELTx
 //	fits_write_key(fptr, TFLOAT, "CDELT1", &pixel, "Coordinate increment per pixel in DEGREES/PIXEL", &status);
