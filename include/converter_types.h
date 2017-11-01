@@ -37,10 +37,19 @@ typedef enum file_naming {
 	RAW_DATETIME
 } file_naming_t;
 
+typedef struct coordinates {
+	short hour;
+	short min;
+	short sec;
+	short msec;
+} coordinates_t;
+
 typedef struct file_metadata {
 	int bitpixel;
 	unsigned int width;
 	unsigned int height;
+	coordinates_t ra;
+	coordinates_t dec;
 	float exptime;
 	float temperature;
 	float ra_coord;
