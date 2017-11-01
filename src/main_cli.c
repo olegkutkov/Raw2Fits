@@ -21,30 +21,73 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
+#include "version.h"
 
 static int verbose_flag;
 
 static struct option cmd_long_options[] =
 {
 	/* These options set a flag. */
-	{"verbose", no_argument,       &verbose_flag, 1},
-	{"brief",   no_argument,       &verbose_flag, 0},
-	/* These options don’t set a flag.
-	We distinguish them by their indices. */
-	{"add",     no_argument,       0, 'a'},
-	{"append",  no_argument,       0, 'b'},
-	{"delete",  required_argument, 0, 'd'},
-	{"create",  required_argument, 0, 'c'},
-	{"file",    required_argument, 0, 'f'},
+	{"verbose", no_argument, &verbose_flag, 1},
+	{"help",   no_argument, 0, 'h'},
+	{"input",   required_argument, 0, 'i'},
+	{"output",  required_argument, 0, 'o'},
+	{"config",  required_argument, 0, 'c'},
 	{0, 0, 0, 0}
 };
+
+void show_help()
+{
+	printf("raw2fits, version: %i.%i.%i\n"
+			, RAW2FITS_VERSION_MAJOR, RAW2FITS_VERSION_MINOR, RAW2FITS_VERSION_PATCH);
+	printf("Oleg Kutkov <elenbert@gmail.com>\nCrimean astrophysical observatory, 2017\n\n");
+
+	printf("\t-h, --help\t\tShow this help and exit\n");
+	printf("\t-v, --verbose\t\tEnable verbose logging\n");
+	printf("\t-i, --input\t\tSet directory with RAW files\n");
+	printf("\t-o, --output\t\tSet directory for output FITS files\n");
+	printf("\t-c, --config <file>\tConfiguration file for converter\n");
+}
 
 int main(int argc, char **argv)
 {
 	int c;
 
-	
+	while (1) {
+		int option_index = 0;
 
+		c = getopt_long (argc, argv, "vhi:o:c:", cmd_long_options, &option_index);
+
+		if (c == -1) {
+			break;
+		}
+
+		switch(c) {
+			case 'v':
+				break;
+
+			case 'h':
+				show_help();
+				return 0;
+
+			case 'i':
+				break;
+
+			case 'o':
+				break;
+
+			case 'c':
+				break;
+
+			case '?':
+				show_help();
+				return 0;
+
+			default:
+				abort();
+		}
+
+	}
 
 	return 0;
 }
