@@ -65,8 +65,14 @@ typedef struct conv_start_argument {
 	GtkEntry *entry_observer;
 	GtkEntry *entry_notes;
 	GtkEntry *entry_date;
-	GtkEntry *entry_ra_coord;
-	GtkEntry *entry_dec_coord;
+	GtkEntry *entry_ra_hour;
+	GtkEntry *entry_ra_min;
+	GtkEntry *entry_ra_sec;
+	GtkEntry *entry_ra_msec;
+	GtkEntry *entry_dec_hour;
+	GtkEntry *entry_dec_min;
+	GtkEntry *entry_dec_sec;
+	GtkEntry *entry_dec_msec;
 	converter_params_t conv_params;
 	done_cb_argument_t done_params;
 	GtkTextBuffer *logger;
@@ -286,8 +292,15 @@ void button_convert_clicked_cb(GtkButton *button, conv_start_argument_t *arg)
 	conv_params->meta.exptime = atof(gtk_entry_get_text(arg->entry_exposure));
 	conv_params->meta.temperature = atof(gtk_entry_get_text(arg->entry_temperature));
 
-	conv_params->meta.ra_coord = coord_any_to_float_deg(gtk_entry_get_text(arg->entry_ra_coord));
-	conv_params->meta.dec_coord = coord_any_to_float_deg(gtk_entry_get_text(arg->entry_dec_coord));
+	conv_params->meta.ra.hour = atoi(gtk_entry_get_text(arg->entry_ra_hour));
+	conv_params->meta.ra.min = atoi(gtk_entry_get_text(arg->entry_ra_min));
+	conv_params->meta.ra.sec = atoi(gtk_entry_get_text(arg->entry_ra_sec));
+	conv_params->meta.ra.msec = atoi(gtk_entry_get_text(arg->entry_ra_msec));
+
+	conv_params->meta.dec.hour = atoi(gtk_entry_get_text(arg->entry_dec_hour));
+	conv_params->meta.dec.min = atoi(gtk_entry_get_text(arg->entry_dec_min));
+	conv_params->meta.dec.sec = atoi(gtk_entry_get_text(arg->entry_dec_sec));
+	conv_params->meta.dec.msec = atoi(gtk_entry_get_text(arg->entry_dec_msec));
 
 	conv_params->imsetup.mode = gtk_combo_box_get_active(arg->combobox_color);
 
@@ -433,8 +446,16 @@ int main(int argc, char *argv[])
 	conv_arg.entry_observer = GTK_ENTRY(gtk_builder_get_object(builder, "entry_observer"));
 	conv_arg.entry_notes = GTK_ENTRY(gtk_builder_get_object(builder, "entry_notes"));
 	conv_arg.entry_date = GTK_ENTRY(gtk_builder_get_object(builder, "entry_date"));
-	conv_arg.entry_ra_coord = GTK_ENTRY(gtk_builder_get_object(builder, "entry_ra"));
-	conv_arg.entry_dec_coord = GTK_ENTRY(gtk_builder_get_object(builder, "entry_dec"));
+
+	conv_arg.entry_ra_hour = GTK_ENTRY(gtk_builder_get_object(builder, "entry_ra_hour"));
+	conv_arg.entry_ra_min = GTK_ENTRY(gtk_builder_get_object(builder, "entry_ra_min"));
+	conv_arg.entry_ra_sec = GTK_ENTRY(gtk_builder_get_object(builder, "entry_ra_sec"));
+	conv_arg.entry_ra_msec = GTK_ENTRY(gtk_builder_get_object(builder, "entry_ra_ms"));
+	conv_arg.entry_dec_hour = GTK_ENTRY(gtk_builder_get_object(builder, "entry_dec_hour"));
+	conv_arg.entry_dec_min = GTK_ENTRY(gtk_builder_get_object(builder, "entry_dec_min"));
+	conv_arg.entry_dec_sec = GTK_ENTRY(gtk_builder_get_object(builder, "entry_dec_sec"));
+	conv_arg.entry_dec_msec = GTK_ENTRY(gtk_builder_get_object(builder, "entry_dec_ms"));
+
 	conv_arg.combobox_color = GTK_COMBO_BOX(gtk_builder_get_object(builder, "combobox_color"));
 	conv_arg.combobox_filenaming = GTK_COMBO_BOX(gtk_builder_get_object(builder, "combobox_outfilename"));
 
