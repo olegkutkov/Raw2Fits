@@ -117,7 +117,7 @@ int is_file_exist(char *filename)
 void make_target_fits_filename(converter_params_t *arg, char *raw_filename, char *out_filename, char *postfix)
 {
 	int iter = 0;
-	char *out_file_name_base, *obj, *datetime, *filter;
+	char *out_file_name_base = NULL, *obj, *datetime, *filter;
 	size_t outdir_len = strlen(arg->outpath);
 	char *base_raw_filename = basename(raw_filename);
 	size_t raw_filename_len = strlen(base_raw_filename);
@@ -222,7 +222,9 @@ void make_target_fits_filename(converter_params_t *arg, char *raw_filename, char
 		}
 	}
 
-	free(out_file_name_base);
+	if (out_file_name_base) {
+		free(out_file_name_base);
+	}
 }
 
 int remove_file(const char *filename)
