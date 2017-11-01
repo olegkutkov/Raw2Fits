@@ -27,6 +27,7 @@
 #include "file_utils.h"
 #include "raw2fits.h"
 #include "coords_calc.h"
+#include "version.h"
 
 static char *FILENAME_CHANNEL_POSTFIX[6] = {
 	"_AVG_GRAY.fits\0",
@@ -152,10 +153,14 @@ int write_fits_header(fitsfile *fptr, file_metadata_t *meta, char *add_comment)
 	float cpix1 = (meta->width + 1) / 2;
 	float cpix2 = (meta->height + 1) / 2;
 	char coord_buf[15];
+	char ver_str[21];
+
+	snprintf(ver_str, 21, "raw2fits %i.%i.%i"
+			, RAW2FITS_VERSION_MAJOR, RAW2FITS_VERSION_MINOR, RAW2FITS_VERSION_PATCH);
 
 	get_current_datetime(time_now);
 
-	fits_write_key(fptr, TSTRING, "CREATOR", "raw2fits converter", "", &status);
+	fits_write_key(fptr, TSTRING, "CREATOR", ver_str, "", &status);
 	fits_write_key(fptr, TSTRING, "DATE", time_now, "Fits creation date, UTC", &status);
 	fits_write_key(fptr, TSTRING, "OBJECT", meta->object, "Name of the object observed", &status);
 	fits_write_key(fptr, TSTRING, "CTYPE1", "RA---TAN", "RA in tangent plane projection", &status);
