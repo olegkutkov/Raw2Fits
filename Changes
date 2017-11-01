@@ -7,3 +7,9 @@
 	- more correct FITS header
 	- new UI inputs for RA and DEC of the object
 	- write RA, DEC and reference point to the FITS header
+
+ 1 November 2017: version 0.3.2
+	- UI inputs for RA and DEC was splitted by 4 fields for H, M, S and SSS
+	- Correclty format decimal values in FITS header
+	- Fix for duplicated CRVAL1 in FITS header
+	- Set current path for directory open dialog
