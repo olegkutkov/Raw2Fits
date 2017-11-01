@@ -69,5 +69,5 @@ uninstall:
 	rm -fr /usr/share/raw2fits/
 
 clean:
-	rm -fr $(PROGRAM) $(PROGRAM).o
+	rm -fr $(PROGRAM) $(PROGRAM).o $(PROGRAM_CLI) $(PROGRAM_CLI).o
 
