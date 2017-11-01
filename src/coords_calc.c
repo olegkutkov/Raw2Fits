@@ -22,6 +22,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
+#include <locale.h>
 #include "coords_calc.h"
 
 static float parse_sexigesimal_str(const char *str)
@@ -87,6 +88,15 @@ void deg_to_sexigesimal_str(float deg, char *dst)
 	double min_frac = (double)min / 60;
 	double sec = (deg - hour - min_frac) * 3600;
 
+	char *saved_locale, *old_locale = setlocale (LC_NUMERIC, NULL);
+
+	saved_locale = strdup(old_locale);
+
+	if (saved_locale == NULL) {
+		perror("Unable get current locale, probably out of memory.\n");
+		return;
+	}
+
 	if (min < 0) {
 		min *= -1;
 	}
@@ -95,7 +105,24 @@ void deg_to_sexigesimal_str(float deg, char *dst)
 		sec *= -1;
 	}
 
+	setlocale(LC_NUMERIC, "en_US");
+
 	snprintf(buf, 14, "%i:%i:%.5f", hour, min, sec);
 	strcpy(dst, buf);
+
+	setlocale(LC_NUMERIC, saved_locale);
+	free(saved_locale);
+}
+
+float coordinates_to_deg(short hour, short min, short sec, short msec)
+{
+	float tmp = (hour > 0 ? hour : (hour * -1) ) + ((float)min) / 60 + ((float)sec + (float)msec / 1000) / 3600;
+
+	return (hour > 0 ? tmp : (tmp * -1));
+}
+
+void coordinates_to_sexigesimal_str(short hour, short min, short sec, short msec, char *dst)
+{
+	snprintf(dst, 14, "%i:%i:%i.%i", hour, min, sec, msec);
 }
 
