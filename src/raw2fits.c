@@ -155,6 +155,9 @@ int write_fits_header(fitsfile *fptr, file_metadata_t *meta, char *add_comment)
 	char coord_buf[15];
 	char ver_str[21];
 
+	float ra = coordinates_to_deg(meta->ra.hour, meta->ra.min, meta->ra.sec, meta->ra.msec);
+	float dec = coordinates_to_deg(meta->dec.hour, meta->dec.min, meta->dec.sec, meta->dec.msec);
+
 	snprintf(ver_str, 21, "raw2fits %i.%i.%i"
 			, RAW2FITS_VERSION_MAJOR, RAW2FITS_VERSION_MINOR, RAW2FITS_VERSION_PATCH);
 
@@ -167,8 +170,8 @@ int write_fits_header(fitsfile *fptr, file_metadata_t *meta, char *add_comment)
 	fits_write_key(fptr, TSTRING, "CTYPE2", "DEC--TAN", "DEC in tangent plane projection", &status);
 	fits_write_key(fptr, TFLOAT, "CRPIX1", &cpix1, "The reference pixel coordinate 1", &status);
 	fits_write_key(fptr, TFLOAT, "CRPIX2", &cpix2, "The reference pixel coordinate 2", &status);
-	fits_write_key(fptr, TFLOAT, "CRVAL1", &meta->ra_coord, "RA at reference pixel in degrees", &status);
-	fits_write_key(fptr, TFLOAT, "CRVAL2", &meta->dec_coord, "DEC at reference pixel in degrees", &status);
+	fits_write_key(fptr, TFLOAT, "CRVAL1", &ra, "Reference pixel value in degrees", &status);
+	fits_write_key(fptr, TFLOAT, "CRVAL2", &dec, "Reference pixel value in degrees", &status);
 
 // TODO: calculate and store CDELTx
 //	fits_write_key(fptr, TFLOAT, "CDELT1", &pixel, "Coordinate increment per pixel in DEGREES/PIXEL", &status);
@@ -181,10 +184,10 @@ int write_fits_header(fitsfile *fptr, file_metadata_t *meta, char *add_comment)
 	fits_write_key(fptr, TSTRING, "FILTER", meta->filter, "Filter used when taking image", &status);
 	fits_write_key(fptr, TSTRING, "OBSERVER", meta->observer, "", &status);
 
-	deg_to_sexigesimal_str(meta->ra_coord, coord_buf);
+	coordinates_to_sexigesimal_str(meta->ra.hour, meta->ra.min, meta->ra.sec, meta->ra.msec, coord_buf);
 	fits_write_key(fptr, TSTRING, "RA", coord_buf, "Object Right Ascension", &status);
 
-	deg_to_sexigesimal_str(meta->dec_coord, coord_buf);
+	coordinates_to_sexigesimal_str(meta->dec.hour, meta->dec.min, meta->dec.sec, meta->dec.msec, coord_buf);
 	fits_write_key(fptr, TSTRING, "DEC", coord_buf, "Object Declination", &status);
 
 	fits_write_key(fptr, TFLOAT, "TEMPER", &meta->temperature, "Camera temperature in C", &status);
