@@ -86,7 +86,7 @@ typedef struct conv_stop_argument {
 	converter_params_t *conv_params;
 } conv_stop_argument_t;
 
-void select_directory(char *dlg_title, dialog_argument_t *arg)
+void select_directory(char *dlg_title, dialog_argument_t *arg, char *use_path)
 {
 	GtkWidget *dialog = gtk_file_chooser_dialog_new (dlg_title,
                                       arg->main_window,
@@ -97,10 +97,14 @@ void select_directory(char *dlg_title, dialog_argument_t *arg)
                                       GTK_RESPONSE_ACCEPT,
                                       NULL);
 
-	if (GTK_RESPONSE_ACCEPT == gtk_dialog_run (GTK_DIALOG (dialog)))
+	if (use_path) {
+		 gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dialog), use_path);
+	}
+
+	if (GTK_RESPONSE_ACCEPT == gtk_dialog_run(GTK_DIALOG (dialog)))
  	{
-		GtkFileChooser *chooser = GTK_FILE_CHOOSER (dialog);
-    	char *filename = gtk_file_chooser_get_filename (chooser);
+		GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);
+		char *filename = gtk_file_chooser_get_filename(chooser);
 
 		arg->result_dir = malloc(strlen(filename) + 1);
 		strcpy(arg->result_dir, filename);
@@ -117,7 +121,7 @@ void select_directory(char *dlg_title, dialog_argument_t *arg)
 
 void button_raw_dir_clicked_cb(GtkButton *button, dialog_argument_t *arg)
 {
-	select_directory("Select directory with CR2 files", arg);
+	select_directory("Select directory with CR2 files", arg, OUT_PATH);
 
 	if (arg->result_dir != NULL) {
 		RAW_PATH = arg->result_dir;
@@ -126,7 +130,7 @@ void button_raw_dir_clicked_cb(GtkButton *button, dialog_argument_t *arg)
 
 void button_out_dir_clicked_cb(GtkButton *button, dialog_argument_t *arg)
 {
-	select_directory("Select output directory for FITS", arg);
+	select_directory("Select output directory for FITS", arg, RAW_PATH);
 
 	if (arg->result_dir != NULL) {
 		OUT_PATH = arg->result_dir;
