@@ -190,8 +190,8 @@ int write_fits_header(fitsfile *fptr, file_metadata_t *meta, char *add_comment)
 	coordinates_to_sexigesimal_str(meta->dec.hour, meta->dec.min, meta->dec.sec, meta->dec.msec, coord_buf);
 	fits_write_key(fptr, TSTRING, "DEC", coord_buf, "Object Declination", &status);
 
-	fits_write_key(fptr, TFLOAT, "TEMPER", &meta->temperature, "Camera temperature in C", &status);
-	fits_write_key(fptr, TSTRING, "NOTES", meta->note, "", &status);
+	fits_write_key(fptr, TFLOAT, "TEMPERAT", &meta->temperature, "Camera temperature in C", &status);
+	fits_write_key(fptr, TSTRING, "OBSNOTES", meta->note, "", &status);
 
 	fits_write_comment(fptr, add_comment, &status);
 
