@@ -24,6 +24,7 @@ float coord_any_to_float_deg(const char *str);
 void deg_to_sexigesimal_str(float deg, char *dst);
 float coordinates_to_deg(short hour, short min, short sec, short msec);
 void coordinates_to_sexigesimal_str(short hour, short min, short sec, short msec, char *dst);
+void sexigesimal_str_to_coords(const char *str, short *hour, short *min, short *sec, short *msec);
 
 #endif
 
