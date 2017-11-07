@@ -387,6 +387,6 @@ void dump_configuration(converter_params_t *conv_params)
 	printf("Mode: %i (%s)\n", conv_params->fsetup.naming, out_filenaming_dump_des[conv_params->fsetup.naming]);
 	printf("Overwrite existing files: %s\n", (conv_params->fsetup.overwrite ? "Yes" : "No"));
 
-	printf("\nEnd of configuration\n");
+	printf("\nEnd of configuration\n\n");
 }
 
