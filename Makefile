@@ -34,7 +34,7 @@ LDFLAG := $(LIBRAW) -lm -lcfitsio -export-dynamic -pthread
 SRC_COMMON := src/converter.c src/list.c src/file_utils.c \
 		src/thread_pool.c src/raw2fits.c src/coords_calc.c
 SRC_UI := src/main.c
-SRC_CLI := src/main_cli.c
+SRC_CLI := src/main_cli.c src/config_loader.c
 
 all: $(PROGRAM)
 
