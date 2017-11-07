@@ -52,8 +52,11 @@ typedef struct file_metadata {
 	coordinates_t dec;
 	float exptime;
 	float temperature;
-	float ra_coord;
-	float dec_coord;
+	float teleaper;
+	float telefoc;
+	float sitelat;
+	float sitelon;
+	float sitelev;
 	char overwrite_instrument;
 	char overwrite_observer;
 	char overwrite_exptime;
@@ -65,6 +68,8 @@ typedef struct file_metadata {
 	char filter[72];
 	char note[72];
 	char date[72];
+	char observatory[72];
+	char sitename[72];
 } file_metadata_t;
 
 typedef struct image_setup {
