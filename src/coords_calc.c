@@ -25,30 +25,36 @@
 #include <locale.h>
 #include "coords_calc.h"
 
-static float parse_sexigesimal_str(const char *str)
+static void split_sexigesimal_str(const char *str, float (*splitted)[])
 {
 	int tok_cnt = 0;
 	const char s[2] = ":";
 	char *token;
-	float splitted[3];
 
 	token = strtok((char *)str, s);
 
 	while( token != NULL ) {
 		if (tok_cnt >= 3) {
-			return 0;
+			return;
 		}
 
-		splitted[tok_cnt] = atof(token);
+		(*splitted)[tok_cnt] = atof(token);
 		token = strtok(NULL, s);
 
 		tok_cnt++;
 	}
 
-	if (splitted[0] < 0) {
-		splitted[1] *= -1;
-		splitted[2] *= -1;
+	if ((*splitted)[0] < 0) {
+		(*splitted)[1] *= -1;
+		(*splitted)[2] *= -1;
 	}
+}
+
+static float parse_sexigesimal_str(const char *str)
+{
+	float splitted[3];
+
+	split_sexigesimal_str(str, &splitted);
 
 	return splitted[0] + splitted[1] / 60 + splitted[2] / 3600;
 }
@@ -124,5 +130,26 @@ float coordinates_to_deg(short hour, short min, short sec, short msec)
 void coordinates_to_sexigesimal_str(short hour, short min, short sec, short msec, char *dst)
 {
 	snprintf(dst, 14, "%i:%i:%i.%i", hour, min, sec, msec);
+}
+
+void sexigesimal_str_to_coords(const char *str, short *hour, short *min, short *sec, short *msec)
+{
+	float splitted[3];
+
+	split_sexigesimal_str(str, &splitted);
+
+	*hour = splitted[0];
+	*min = splitted[1];
+	*sec = splitted[2];
+
+	if (*min < 0) {
+		*min *= -1;
+	}
+
+	if (*sec < 0) {
+		*sec *= -1;
+	}
+
+	*msec = (short)((splitted[2] - *sec) * 1000);
 }
 

@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <getopt.h>
 #include <string.h>
-#include <libconfig.h>
+#include "config_loader.h"
 #include "converter.h"
 #include "version.h"
 
@@ -50,125 +50,6 @@ void show_help()
 	printf("\t-i, --input\t\tSet directory with RAW files\n");
 	printf("\t-o, --output\t\tSet directory for output FITS files\n");
 	printf("\t-c, --config <file>\tConfiguration file for converter\n");
-}
-
-int load_configuration_io_paths(config_setting_t *setting, converter_params_t *conv_params)
-{
-	const char *str;
-
-	if (!config_setting_lookup_string(setting, "raw_dir", &str)) {
-		fprintf(stderr, "Can't find raw2fits.io.raw_dir param in the config file\n");
-		return -1;
-	}
-
-	strcpy(conv_params->inpath, str);
-
-	if (!config_setting_lookup_string(setting, "fits_dir", &str)) {
-		fprintf(stderr, "Can't find raw2fits.io.raw_dir param in the config file\n");
-		return -1;
-	}
-
-	strcpy(conv_params->outpath, str);
-
-	return 0;
-}
-
-void load_configuration_io_filters(config_setting_t *setting, converter_params_t *conv_params)
-{
-	int count, i;
-	const char *str;
-
-	count = config_setting_length(setting);
-
-	for (i = 0; i < count; ++i) {
-		str = config_setting_get_string_elem(setting, i);
-		printf("raw_filter: %s\n", str);
-	}
-}
-
-int load_configuration_io_filenaming(config_setting_t *setting, converter_params_t *conv_params)
-{
-	int val;
-
-	if (!config_setting_lookup_int(setting, "mode", &val)) {
-		fprintf(stderr, "Can't find raw2fits.io.mode param in the config file\n");
-		return -1;
-	}
-
-	conv_params->fsetup.naming = val;
-
-	if (!config_setting_lookup_bool(setting, "overwrite", &val)) {
-		fprintf(stderr, "Can't find raw2fits.io.overwrite param in the config file\n");
-		return -1;
-	}
-
-	conv_params->fsetup.overwrite = (char) val;
-
-	return 0;
-}
-
-int load_configuration(char *confile, converter_params_t *conv_params)
-{
-	config_t cfg;
-	config_setting_t *setting;
-
-	config_init(&cfg);
-
-	if (!config_read_file(&cfg, confile)) {
-		fprintf(stderr, "%s:%d - %s\n", config_error_file(&cfg)
-				, config_error_line(&cfg), config_error_text(&cfg));
-
-		config_destroy(&cfg);
-
-		return (EXIT_FAILURE);
-	}
-
-	setting = config_lookup(&cfg, "raw2fits");
-
-	if (!setting) {
-		fprintf(stderr, "Given file is not raw2fits configuration\n");
-
-		config_destroy(&cfg);
-		return (EXIT_FAILURE);
-	}
-
-	setting = config_lookup(&cfg, "raw2fits.io");
-
-	if (!setting) {
-		fprintf(stderr, "Can't find input/output params in the config file\n");
-
-		config_destroy(&cfg);
-		return (EXIT_FAILURE);
-	}
-
-	if (load_configuration_io_paths(setting, conv_params) < 0) {
-		config_destroy(&cfg);
-		return (EXIT_FAILURE);
-	}
-
-	setting = config_lookup(&cfg, "raw2fits.io.raw_filter_name");
-
-	if (setting) {
-		load_configuration_io_filters(setting, conv_params);
-	}
-
-	setting = config_lookup(&cfg, "raw2fits.io.filenaming");
-
-	if (!setting) {
-		fprintf(stderr, "Can't find raw2fits.io.filenaming param in the config file\n");
-
-		config_destroy(&cfg);
-		return (EXIT_FAILURE);
-	}
-
-	if (load_configuration_io_filenaming(setting, conv_params) < 0) {
-		config_destroy(&cfg);
-		return (EXIT_FAILURE);
-	}
-
-	config_destroy(&cfg);
-
-	return 0;
 }
 
 int main(int argc, char **argv)
@@ -221,11 +102,23 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
+	memset(&conv_params, 0, sizeof(converter_params_t));
+
 	ret = load_configuration(confile, &conv_params);
 
 	if (ret != 0) {
 		return ret;
 	}
+
+	if (indir != NULL) {
+		strcpy(conv_params.inpath, indir);
+	}
+
+	if (outdir != NULL) {
+		strcpy(conv_params.outpath, outdir);
+	}
+
+	dump_configuration(&conv_params);
 
 	return 0;
 }

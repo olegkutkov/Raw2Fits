@@ -1,5 +1,5 @@
 /* 
-   coords_calc.h
+  config_loader.h
 
    Copyright 2017  Oleg Kutkov <elenbert@gmail.com>
 
@@ -17,14 +17,14 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  
  */
 
-#ifndef __COORDS_CALC_H__
-#define __COORDS_CALC_H__
+#ifndef __CONFIG_LOADER_H__
+#define __CONFIG_LOADER_H__
 
-float coord_any_to_float_deg(const char *str);
-void deg_to_sexigesimal_str(float deg, char *dst);
-float coordinates_to_deg(short hour, short min, short sec, short msec);
-void coordinates_to_sexigesimal_str(short hour, short min, short sec, short msec, char *dst);
-void sexigesimal_str_to_coords(const char *str, short *hour, short *min, short *sec, short *msec);
+#include "converter_types.h"
+
+int load_configuration(char *confile, converter_params_t *conv_params);
+int validate_configuration(converter_params_t *conv_params);
+void dump_configuration(converter_params_t *conv_params);
 
 #endif
 
