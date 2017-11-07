@@ -184,6 +184,8 @@ int main(int argc, char **argv)
 		sleep(1);
 	}
 
+	converter_stop(&conv_params);
+
 	printf("\nDone!\n");
 
 	return 0;
