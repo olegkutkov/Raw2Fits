@@ -134,7 +134,8 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
-	memset(&conv_params, 0, sizeof(converter_params_t));
+	conv_params.converter_run = 1;
+	memset(&conv_params.meta, 0, sizeof(file_metadata_t));
 
 	printf("raw2fits, version: %i.%i.%i\n"
 		, RAW2FITS_VERSION_MAJOR, RAW2FITS_VERSION_MINOR, RAW2FITS_VERSION_PATCH);
