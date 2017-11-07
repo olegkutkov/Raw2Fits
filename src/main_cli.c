@@ -22,11 +22,15 @@
 #include <stdlib.h>
 #include <getopt.h>
 #include <string.h>
+#include <unistd.h>
+#include <stdarg.h>
+#include <signal.h>
 #include "config_loader.h"
 #include "converter.h"
 #include "version.h"
 
 static int verbose_flag;
+static volatile int RUN_FLAG = 0;
 
 static struct option cmd_long_options[] =
 {
@@ -50,6 +54,34 @@ void show_help()
 	printf("\t-i, --input\t\tSet directory with RAW files\n");
 	printf("\t-o, --output\t\tSet directory for output FITS files\n");
 	printf("\t-c, --config <file>\tConfiguration file for converter\n");
+}
+
+void progress_setup(void *arg, int max_val)
+{
+}
+
+void progress_update(void *arg)
+{
+}
+
+void logger_msg(void *arg, char *fmt, ...)
+{
+	va_list args;
+
+	va_start(args, fmt);
+	vprintf(fmt, args);
+
+	va_end(args);
+}
+
+void converting_done(void *arg)
+{
+	RUN_FLAG = 0;
+}
+
+void interrupt_handler(int val)
+{
+	RUN_FLAG = 0;
 }
 
 int main(int argc, char **argv)
@@ -125,10 +157,34 @@ int main(int argc, char **argv)
 		strcpy(conv_params.outpath, outdir);
 	}
 
+	conv_params.progress.progr_arg = NULL;
+
+	conv_params.progress.progr_setup = &progress_setup;
+	conv_params.progress.progr_update = &progress_update;
+
+	conv_params.logger_arg = NULL;
+	conv_params.logger_msg = &logger_msg;
+
+	conv_params.done_arg = NULL;
+	conv_params.complete = &converting_done;
+
 	printf("\nInput directory: %s\n", conv_params.inpath);
 	printf("Output directory: %s\n\n", conv_params.outpath);
 
 	dump_configuration(&conv_params);
+
+	printf("Staring converter (press Ctrl-C to terminate procedure) ...\n\n");
+
+	RUN_FLAG = 1;
+	signal(SIGINT, interrupt_handler);
+
+	convert_files(&conv_params);
+
+	while (RUN_FLAG) {
+		sleep(1);
+	}
+
+	printf("\nDone!\n");
 
 	return 0;
 }
