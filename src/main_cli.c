@@ -104,9 +104,16 @@ int main(int argc, char **argv)
 
 	memset(&conv_params, 0, sizeof(converter_params_t));
 
+	printf("raw2fits, version: %i.%i.%i\n"
+		, RAW2FITS_VERSION_MAJOR, RAW2FITS_VERSION_MINOR, RAW2FITS_VERSION_PATCH);
+
+	printf("Loading configuration from %s\n", confile);
+
+
 	ret = load_configuration(confile, &conv_params);
 
 	if (ret != 0) {
+		printf("\nExiting...\n");
 		return ret;
 	}
 
@@ -117,6 +124,9 @@ int main(int argc, char **argv)
 	if (outdir != NULL) {
 		strcpy(conv_params.outpath, outdir);
 	}
+
+	printf("\nInput directory: %s\n", conv_params.inpath);
+	printf("Output directory: %s\n\n", conv_params.outpath);
 
 	dump_configuration(&conv_params);
 
