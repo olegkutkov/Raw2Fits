@@ -25,11 +25,16 @@ DEBUG := -g -ggdb
 
 CFLAGS := -Wall -O2 -pipe -I./include -I/usr/include/cfitsio #$(DEBUG)
 
+<<<<<<< HEAD
 GTKLIB = `pkg-config --cflags --libs gtk+-3.0`
 
 LIBCONFIG = -lconfig
 
+=======
+GTKLIB=`pkg-config --cflags --libs gtk+-3.0`
+>>>>>>> 49a1bacc89f0884a964ed0e067eec1abbe584dba
 LIBRAW := -L/usr/lib -lraw
+LIBCONFIG = -lconfig
 
 LDFLAG := $(LIBRAW) -lm -lcfitsio -export-dynamic -pthread
 
