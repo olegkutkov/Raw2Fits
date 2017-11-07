@@ -170,6 +170,10 @@ int load_configuration_fits_fields(config_setting_t *setting, converter_params_t
 		conv_params->meta.temperature = fval;
 	}
 
+	if (config_setting_lookup_string(setting, "notes", &str)) {
+		strcpy(conv_params->meta.note, str);
+	}
+
 	return 0;
 }
 
@@ -371,6 +375,7 @@ void dump_configuration(converter_params_t *conv_params)
 
 	printf("OBSERVER:\t\t%s\n", conv_params->meta.observer);
 	printf("DATE:\t\t%s\n", conv_params->meta.date);
+	printf("NOTES:\t\t\t%s\n", conv_params->meta.note);
 
 	printf("\nEnd of FITS header data\n");
 
