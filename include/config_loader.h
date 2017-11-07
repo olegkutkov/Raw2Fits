@@ -23,7 +23,6 @@
 #include "converter_types.h"
 
 int load_configuration(char *confile, converter_params_t *conv_params);
-int validate_configuration(converter_params_t *conv_params);
 void dump_configuration(converter_params_t *conv_params);
 
 #endif
