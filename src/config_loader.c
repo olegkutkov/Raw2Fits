@@ -22,6 +22,7 @@
 #include <string.h>
 #include <libconfig.h>
 #include "config_loader.h"
+#include "coords_calc.h"
 
 int load_configuration_io_paths(config_setting_t *setting, converter_params_t *conv_params)
 {
@@ -151,6 +152,24 @@ int load_configuration_fits_fields(config_setting_t *setting, converter_params_t
 
 int load_configuration_fits_object_coords(config_setting_t *setting, converter_params_t *conv_params)
 {
+	const char *str;
+
+	if (!config_setting_lookup_string(setting, "ra", &str)) {
+		fprintf(stderr, "Can't find RA coordinate in the raw2fits.fits.object_coordinates\n");
+		return -1;
+	}
+
+	sexigesimal_str_to_coords(str, &conv_params->meta.ra.hour, &conv_params->meta.ra.min
+								, &conv_params->meta.ra.sec, &conv_params->meta.ra.msec);
+
+	if (!config_setting_lookup_string(setting, "dec", &str)) {
+		fprintf(stderr, "Can't find RA coordinate in the raw2fits.fits.object_coordinates\n");
+		return -1;
+	}
+
+	sexigesimal_str_to_coords(str, &conv_params->meta.dec.hour, &conv_params->meta.dec.min
+								, &conv_params->meta.dec.sec, &conv_params->meta.dec.msec);
+
 	return 0;
 }
 
@@ -248,6 +267,17 @@ int validate_configuration(converter_params_t *conv_params)
 
 void dump_configuration(converter_params_t *conv_params)
 {
-	
+	char ra[17], dec[17];
+
+	printf("OBJECT: %s\n", conv_params->meta.object);
+
+	coordinates_to_sexigesimal_str(conv_params->meta.ra.hour, conv_params->meta.ra.min,
+									conv_params->meta.ra.sec, conv_params->meta.ra.msec, ra);
+
+	coordinates_to_sexigesimal_str(conv_params->meta.dec.hour, conv_params->meta.dec.min,
+									conv_params->meta.dec.sec, conv_params->meta.dec.msec, dec);
+
+	printf("OBJECT RA: %s\tDEC: %s\n", ra, dec);
+
 }
 

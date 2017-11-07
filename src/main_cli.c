@@ -102,6 +102,8 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
+	memset(&conv_params, 0, sizeof(converter_params_t));
+
 	ret = load_configuration(confile, &conv_params);
 
 	if (ret != 0) {
@@ -115,6 +117,8 @@ int main(int argc, char **argv)
 	if (outdir != NULL) {
 		strcpy(conv_params.outpath, outdir);
 	}
+
+	dump_configuration(&conv_params);
 
 	return 0;
 }
