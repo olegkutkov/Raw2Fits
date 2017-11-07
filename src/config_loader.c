@@ -24,6 +24,24 @@
 #include "config_loader.h"
 #include "coords_calc.h"
 
+static const char *color_mode_dump_desc[] =
+{
+	"Convert RGB to average grayscale",
+	"R, G and B channels to the separate FITS's",
+	"R, G and B channels to the one FITS with separate headers",
+	"Only R channel",
+	"Only G channel",
+	"Only B channel"
+};
+
+static const char *out_filenaming_dump_des[] =
+{
+	"<RAW file name>.fits",
+	"<object>_<datetime>.fits",
+	"<object>_<filter>_<datetime>.fits",
+	"<RAW file name>_<datetime>.fits"
+};
+
 int load_configuration_io_paths(config_setting_t *setting, converter_params_t *conv_params)
 {
 	const char *str;
@@ -64,6 +82,11 @@ int load_configuration_io_filenaming(config_setting_t *setting, converter_params
 
 	if (!config_setting_lookup_int(setting, "mode", &val)) {
 		fprintf(stderr, "Can't find raw2fits.io.mode param in the config file\n");
+		return -1;
+	}
+
+	if (val < 0 || val > 3) {
+		printf("Invalid raw2fits.io.mode value = %i, possible range is 0-3\n", val);
 		return -1;
 	}
 
@@ -173,6 +196,46 @@ int load_configuration_fits_object_coords(config_setting_t *setting, converter_p
 	return 0;
 }
 
+int load_image_colors_options(config_setting_t *setting, converter_params_t *conv_params)
+{
+	int val;
+
+	if (!config_setting_lookup_int(setting, "mode", &val)) {
+		fprintf(stderr, "Can't find raw2fits.colors.mode param in the config file\n");
+		return -1;
+	}
+
+	if (val < 0 || val > 5) {
+		printf("Invalid raw2fits.colors.mode value = %i, possible range is 0-5\n", val);
+		return -1;
+	}
+
+	conv_params->imsetup.mode = val;
+
+	if (!config_setting_lookup_bool(setting, "autobright", &val)) {
+		fprintf(stderr, "Can't find raw2fits.colors.autobright param in the config file\n");
+		return -1;
+	}
+
+	conv_params->imsetup.apply_auto_bright = (char) val;
+
+	if (!config_setting_lookup_bool(setting, "interpolation", &val)) {
+		fprintf(stderr, "Can't find raw2fits.colors.interpolation param in the config file\n");
+		return -1;
+	}
+
+	conv_params->imsetup.apply_interpolation = (char) val;
+
+	if (!config_setting_lookup_bool(setting, "autoscale", &val)) {
+		fprintf(stderr, "Can't find raw2fits.colors.autoscale param in the config file\n");
+		return -1;
+	}
+
+	conv_params->imsetup.apply_autoscale = (char) val;
+
+	return 0;
+}
+
 int load_configuration(char *confile, converter_params_t *conv_params)
 {
 	config_t cfg;
@@ -254,14 +317,22 @@ int load_configuration(char *confile, converter_params_t *conv_params)
 		load_configuration_fits_object_coords(setting, conv_params);
 	}
 
+	setting = config_lookup(&cfg, "raw2fits.colors");
+
+	if (!setting) {
+		fprintf(stderr, "Can't find image & colors processing options in the config file\n");
+
+		config_destroy(&cfg);
+		return (EXIT_FAILURE);
+	}
+
+	if (load_image_colors_options(setting, conv_params) < 0) {
+		config_destroy(&cfg);
+		return (EXIT_FAILURE);
+	}
 
 	config_destroy(&cfg);
 
-	return 0;
-}
-
-int validate_configuration(converter_params_t *conv_params)
-{
 	return 0;
 }
 
@@ -269,7 +340,9 @@ void dump_configuration(converter_params_t *conv_params)
 {
 	char ra[17], dec[17];
 
-	printf("OBJECT: %s\n", conv_params->meta.object);
+	printf("FITS header data loaded from the configuration file: \n");
+
+	printf("OBJECT:\t\t\t%s\n", conv_params->meta.object);
 
 	coordinates_to_sexigesimal_str(conv_params->meta.ra.hour, conv_params->meta.ra.min,
 									conv_params->meta.ra.sec, conv_params->meta.ra.msec, ra);
@@ -277,7 +350,43 @@ void dump_configuration(converter_params_t *conv_params)
 	coordinates_to_sexigesimal_str(conv_params->meta.dec.hour, conv_params->meta.dec.min,
 									conv_params->meta.dec.sec, conv_params->meta.dec.msec, dec);
 
-	printf("OBJECT RA: %s\tDEC: %s\n", ra, dec);
+	printf("OBJECT RA:\t\t%s\n", ra);
+	printf("OBJECT DEC:\t\t%s\n\n", dec);
 
+	printf("TELESCOPE:\t\t%s\n", conv_params->meta.telescope);
+	printf("TELESCOPE APERTURE:\t%f meters\n", conv_params->meta.teleaper);
+	printf("TELESCOPE FOCAL LENGTH: %f meters\n", conv_params->meta.telefoc);
+	printf("INSTRUMENT:\t\t%s\n\n", conv_params->meta.instrument);
+
+	printf("OBSERVATORY:\t\t%s\n", conv_params->meta.observatory);
+	printf("SITENAME:\t\t%s\n", conv_params->meta.sitename);
+	printf("SITE LAT:\t\t%f\n", conv_params->meta.sitelat);
+	printf("SITE LON:\t\t%f\n", conv_params->meta.sitelon);
+	printf("SITE ELEVATION:\t\t%f meters\n\n", conv_params->meta.sitelev);
+
+	printf("FILTER:\t\t\t%s\n", conv_params->meta.filter);
+	printf("EXPOSURE:\t\t%.4f seconds\n\n", conv_params->meta.exptime);
+
+	printf("TEMPERATURE:\t\t%.2f C\n\n", conv_params->meta.temperature);
+
+	printf("OBSERVER:\t\t%s\n", conv_params->meta.observer);
+	printf("DATE:\t\t%s\n", conv_params->meta.date);
+
+	printf("\nEnd of FITS header data\n");
+
+
+	printf("\nImage & colors options:\n");
+
+	printf("Mode: %i (%s)\n", conv_params->imsetup.mode, color_mode_dump_desc[conv_params->imsetup.mode]);
+	printf("Apply autobright by histogram: %s\n", (conv_params->imsetup.apply_auto_bright ? "Yes" : "No"));
+	printf("Apply pixels interpolation: %s\n", (conv_params->imsetup.apply_interpolation ? "Yes" : "No"));
+	printf("Apply pixels autoscale: %s\n", (conv_params->imsetup.apply_autoscale ? "Yes" : "No"));
+
+
+	printf("\nOutput options:\n");
+	printf("Mode: %i (%s)\n", conv_params->fsetup.naming, out_filenaming_dump_des[conv_params->fsetup.naming]);
+	printf("Overwrite existing files: %s\n", (conv_params->fsetup.overwrite ? "Yes" : "No"));
+
+	printf("\nEnd of configuration\n");
 }
 
