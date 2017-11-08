@@ -33,6 +33,11 @@
 static int QUIET_FLAG = 0;
 static volatile int RUN_FLAG = 0;
 
+static int QUITE_COUNTER_ANI = 0;
+static int QUITE_MAX_COUNTER_ANI = 0;
+
+static char *PROGRESS_ANI_CHARS = NULL;
+
 static struct option cmd_long_options[] =
 {
 	{"quiet", no_argument, 0, 'q'},
@@ -58,10 +63,42 @@ void show_help()
 
 void progress_setup(void *arg, int max_val)
 {
+	QUITE_MAX_COUNTER_ANI = max_val;
+
+	PROGRESS_ANI_CHARS = (char *) calloc(1, QUITE_MAX_COUNTER_ANI + 1);
+	PROGRESS_ANI_CHARS[0] = '[';
 }
 
 void progress_update(void *arg)
 {
+	int i;
+	int pval = ((float)QUITE_COUNTER_ANI / (float)QUITE_MAX_COUNTER_ANI) * 100;
+
+	for (i = 1; i < QUITE_MAX_COUNTER_ANI; i++) {
+		if (i <= QUITE_COUNTER_ANI) {
+			PROGRESS_ANI_CHARS[i] = '=';
+		} else {
+			PROGRESS_ANI_CHARS[i] = ' ';
+		}
+
+		if (i == QUITE_MAX_COUNTER_ANI -1) {
+			PROGRESS_ANI_CHARS[i] = ']';
+		}
+	}
+
+	if (QUITE_COUNTER_ANI == QUITE_MAX_COUNTER_ANI - 1) {
+		pval = 100;
+	}
+
+	printf("\rOverall progress: %s - %i %%", PROGRESS_ANI_CHARS, pval);
+
+	if (QUIET_FLAG) {
+		fflush(stdout);
+	} else {
+		printf("\n");
+	}
+
+	QUITE_COUNTER_ANI++;
 }
 
 void logger_msg(void *arg, char *fmt, ...)
@@ -202,7 +239,16 @@ int main(int argc, char **argv)
 
 	converter_stop(&conv_params);
 
+	if (QUIET_FLAG) {
+		printf("\n");
+	}
+
 	printf("\nDone!\n");
+
+	if (PROGRESS_ANI_CHARS) {
+		free(PROGRESS_ANI_CHARS);
+		PROGRESS_ANI_CHARS = NULL;
+	}
 
 	return 0;
 }
