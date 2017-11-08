@@ -27,6 +27,7 @@
 #include <signal.h>
 #include "config_loader.h"
 #include "converter.h"
+#include "file_utils.h"
 #include "version.h"
 
 static int verbose_flag;
@@ -156,6 +157,16 @@ int main(int argc, char **argv)
 
 	if (outdir != NULL) {
 		strcpy(conv_params.outpath, outdir);
+	}
+
+	if (!is_file_exist(conv_params.inpath)) {
+		fprintf(stderr, "Path %s doesn't exists\n", conv_params.inpath);
+		return -1;
+	}
+
+	if (!is_file_exist(conv_params.outpath)) {
+		fprintf(stderr, "Path %s doesn't exists\n", conv_params.outpath);
+		return -1;
 	}
 
 	conv_params.progress.progr_arg = NULL;
