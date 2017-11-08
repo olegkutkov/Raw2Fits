@@ -19,7 +19,7 @@ $ sudo make install
 
 ## Console version
 ```sh
-$ make clie
+$ make cli
 $ sudo make install-cli
 ```
 
