@@ -30,13 +30,12 @@
 #include "file_utils.h"
 #include "version.h"
 
-static int verbose_flag;
+static int QUIET_FLAG = 0;
 static volatile int RUN_FLAG = 0;
 
 static struct option cmd_long_options[] =
 {
-	/* These options set a flag. */
-	{"verbose", no_argument, &verbose_flag, 1},
+	{"quiet", no_argument, 0, 'q'},
 	{"help",   no_argument, 0, 'h'},
 	{"input",   required_argument, 0, 'i'},
 	{"output",  required_argument, 0, 'o'},
@@ -51,7 +50,7 @@ void show_help()
 	printf("Oleg Kutkov <elenbert@gmail.com>\nCrimean astrophysical observatory, 2017\n\n");
 
 	printf("\t-h, --help\t\tShow this help and exit\n");
-	printf("\t-v, --verbose\t\tEnable verbose logging\n");
+	printf("\t-q, --quiet\t\tReduce ouptut messages\n");
 	printf("\t-i, --input\t\tSet directory with RAW files\n");
 	printf("\t-o, --output\t\tSet directory for output FITS files\n");
 	printf("\t-c, --config <file>\tConfiguration file for converter\n");
@@ -67,6 +66,10 @@ void progress_update(void *arg)
 
 void logger_msg(void *arg, char *fmt, ...)
 {
+	if (QUIET_FLAG) {
+		return;
+	}
+
 	va_list args;
 
 	va_start(args, fmt);
@@ -94,14 +97,15 @@ int main(int argc, char **argv)
 	while (1) {
 		int option_index = 0;
 
-		c = getopt_long (argc, argv, "vhi:o:c:", cmd_long_options, &option_index);
+		c = getopt_long(argc, argv, "qhi:o:c:", cmd_long_options, &option_index);
 
 		if (c == -1) {
 			break;
 		}
 
 		switch(c) {
-			case 'v':
+			case 'q':
+				QUIET_FLAG = 1;
 				break;
 
 			case 'h':
