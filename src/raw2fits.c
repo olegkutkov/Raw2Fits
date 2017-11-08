@@ -178,10 +178,17 @@ int write_fits_header(fitsfile *fptr, file_metadata_t *meta, char *add_comment)
 //	fits_write_key(fptr, TFLOAT, "CDELT2", &pixel, "Coordinate increment per pixel in DEGREES/PIXEL", &status);
 
 	fits_write_key(fptr, TSTRING, "TELESCOP", meta->telescope, "Telescope", &status);
+	fits_write_key(fptr, TFLOAT, "TELAPER", &meta->teleaper, "Clear aperture of the telescope [m]", &status);
+	fits_write_key(fptr, TFLOAT, "TELFOC", &meta->telefoc, "Focal length of the telescope [m]", &status);
 	fits_write_key(fptr, TSTRING, "INSTRUME", meta->instrument, "Detector type", &status);
 	fits_write_key(fptr, TSTRING, "DATE-OBS", meta->date, "Observation date and time, UTC", &status);
 	fits_write_key(fptr, TFLOAT, "EXPTIME", &meta->exptime, "Exposure time in seconds", &status);
 	fits_write_key(fptr, TSTRING, "FILTER", meta->filter, "Filter used when taking image", &status);
+	fits_write_key(fptr, TSTRING, "OBSERVAT", meta->observatory, "Observatory name", &status);
+	fits_write_key(fptr, TSTRING, "SITENAME", meta->sitename, "Observatory site name", &status);
+	fits_write_key(fptr, TFLOAT, "SITELAT", &meta->sitelat, "Latitude of the observing site, decimal degrees", &status);
+	fits_write_key(fptr, TFLOAT, "SITELONG", &meta->sitelon, "East longitude of the observing site, decimal degrees", &status);
+	fits_write_key(fptr, TFLOAT, "SITEELEV", &meta->sitelev, "Elevation of the observatory site [m].", &status);
 	fits_write_key(fptr, TSTRING, "OBSERVER", meta->observer, "", &status);
 
 	coordinates_to_sexigesimal_str(meta->ra.hour, meta->ra.min, meta->ra.sec, meta->ra.msec, coord_buf);
