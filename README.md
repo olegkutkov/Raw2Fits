@@ -1,6 +1,7 @@
 Raw2Fits
 ==
 Convert digital camera's RAW files to the scientific FITS format
+Console and GUI version.
 
 Author: Oleg Kutkov <elenbert@gmail.com>, 
 Crimean astrophysical observatory.
@@ -9,9 +10,19 @@ Crimean astrophysical observatory.
 ```sh
 $ git clone https://github.com/olegkutkov/Raw2Fits.git
 $ cd Raw2Fits
+```
+## GUI version
+```sh
 $ make
 $ sudo make install
 ```
+
+## Console version
+```sh
+$ make clie
+$ sudo make install-cli
+```
+
 Raw to Fits application should appear in your DE applications menu
 # Dependencies
 
@@ -25,8 +36,12 @@ You can always get actual version from the official website: https://www.libraw.
 Library of C and Fortran subroutines for reading and writing data files in FITS.
 You can always get actual version from the official website: https://heasarc.gsfc.nasa.gov/fitsio/fitsio.html
 
-### libgtk-3
+### libgtk-3 (GUI version only)
 Install any version available in your distribution
+
+### libconfig (Console version only)
+Install any version available in your distribution
+
 
 # Supported cameras
 Raw2Fits was successfully tested with raw files of this cameras vendors and models:
