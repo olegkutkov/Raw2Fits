@@ -23,7 +23,7 @@ PROGRAM_CLI = raw2fits-cli
 
 DEBUG := -g -ggdb
 
-CFLAGS := -Wall -O2 -pipe -I./include -I/usr/include/cfitsio #$(DEBUG)
+CFLAGS := -Wall -pipe -I./include -I/usr/include/cfitsio $(DEBUG)
 
 GTKLIB=`pkg-config --cflags --libs gtk+-3.0`
 LIBRAW := -L/usr/lib -lraw
@@ -65,6 +65,12 @@ uninstall:
 	rm -f /usr/share/raw2fits/raw2fits_128x128.png
 	rm -f /usr/share/raw2fits/ui.glade
 	rm -fr /usr/share/raw2fits/
+
+install-cli:
+	cp -f raw2fits-cli /usr/bin
+
+uninstall-cli:
+	rm -f /usr/bin/raw2fits-cli
 
 clean:
 	rm -fr $(PROGRAM) $(PROGRAM).o $(PROGRAM_CLI) $(PROGRAM_CLI).o
