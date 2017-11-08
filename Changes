@@ -16,5 +16,10 @@
 
 ***
  9 November 2017: version 0.4.0
-    - introduced console version of the converter
-    - minor fixes
+	- introduced console version of the converter
+	- minor fixes
+
+ 9 November 2017: version 0.4.1
+	- write all fits fields
+	- minor config correction
+
