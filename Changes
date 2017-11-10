@@ -28,3 +28,6 @@
 	- fix error in degrees calculation
 	- fix loading of the float/int values from config file
 
+ 10 November 2017: version 0.4.3
+	- handle paste event on coord fields, parse pasted value and fill all coord entries with proper values
+
