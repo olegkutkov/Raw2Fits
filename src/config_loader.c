@@ -102,6 +102,20 @@ int load_configuration_io_filenaming(config_setting_t *setting, converter_params
 	return 0;
 }
 
+float load_float_value_anyway(config_setting_t *setting, char *fieldname)
+{
+	double fval = 0;
+	int val = 0;
+
+	if (!config_setting_lookup_float(setting, fieldname, &fval)) {
+		if (config_setting_lookup_int(setting, fieldname, &val)) {
+			fval = (float) val;
+		}
+	}
+
+	return fval;
+}
+
 int load_configuration_fits_fields(config_setting_t *setting, converter_params_t *conv_params)
 {
 	const char *str;
@@ -138,17 +152,14 @@ int load_configuration_fits_fields(config_setting_t *setting, converter_params_t
 		strcpy(conv_params->meta.sitename, str);
 	}
 
-	if (config_setting_lookup_float(setting, "sitelat", &fval)) {
-		conv_params->meta.sitelat = fval;
-	}
+	fval = load_float_value_anyway(setting, "sitelat");
+	conv_params->meta.sitelat = fval;
 
-	if (config_setting_lookup_float(setting, "sitelon", &fval)) {
-		conv_params->meta.sitelon = fval;
-	}
+	fval = load_float_value_anyway(setting, "sitelon");
+	conv_params->meta.sitelon = fval;
 
-	if (config_setting_lookup_float(setting, "sitelev", &fval)) {
-		conv_params->meta.sitelev = fval;
-	}
+	fval = load_float_value_anyway(setting, "sitelev");
+	conv_params->meta.sitelev = fval;
 
 	if (config_setting_lookup_string(setting, "observer", &str)) {
 		strcpy(conv_params->meta.observer, str);
@@ -162,13 +173,11 @@ int load_configuration_fits_fields(config_setting_t *setting, converter_params_t
 		strcpy(conv_params->meta.date, str);
 	}
 
-	if (config_setting_lookup_float(setting, "exposure", &fval)) {
-		conv_params->meta.exptime = fval;
-	}
+	fval = load_float_value_anyway(setting, "exposure");
+	conv_params->meta.exptime = fval;
 
-	if (config_setting_lookup_float(setting, "temperature", &fval)) {
-		conv_params->meta.temperature = fval;
-	}
+	fval = load_float_value_anyway(setting, "temperature");
+	conv_params->meta.temperature = fval;
 
 	if (config_setting_lookup_string(setting, "notes", &str)) {
 		strcpy(conv_params->meta.note, str);
@@ -366,7 +375,7 @@ void dump_configuration(converter_params_t *conv_params)
 	printf("SITENAME:\t\t%s\n", conv_params->meta.sitename);
 	printf("SITE LAT:\t\t%f\n", conv_params->meta.sitelat);
 	printf("SITE LON:\t\t%f\n", conv_params->meta.sitelon);
-	printf("SITE ELEVATION:\t\t%f meters\n\n", conv_params->meta.sitelev);
+	printf("SITE ELEVATION:\t\t%.2f meters\n\n", conv_params->meta.sitelev);
 
 	printf("FILTER:\t\t\t%s\n", conv_params->meta.filter);
 	printf("EXPOSURE:\t\t%.4f seconds\n\n", conv_params->meta.exptime);
