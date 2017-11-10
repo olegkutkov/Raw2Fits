@@ -92,6 +92,10 @@ typedef struct conv_stop_argument {
 	converter_params_t *conv_params;
 } conv_stop_argument_t;
 
+typedef struct entry_cb_paste {
+	GtkEntry *entries[4];
+} entry_cb_paste_t;
+
 void select_directory(char *dlg_title, dialog_argument_t *arg, char *use_path)
 {
 	GtkWidget *dialog = gtk_file_chooser_dialog_new (dlg_title,
@@ -353,6 +357,54 @@ void button_about_clicked_cb(GtkButton *button, about_dialog_argument_t *arg)
 	gtk_widget_show(GTK_WIDGET(arg->dlg));
 }
 
+void on_coord_paste(GtkEntry *entry, gpointer arg)
+{
+	int entry_count = 0, idx;
+	char *token, *dot;
+	char coord_delimit[] = ":\t ";
+	char buf[4] = { 0 };
+
+	entry_cb_paste_t *paste_arg = (entry_cb_paste_t *) arg;
+
+	GtkClipboard* clipboard = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
+	char *clipboard_txt = gtk_clipboard_wait_for_text(clipboard);
+
+	gtk_entry_set_text(entry, "");
+
+	token = strtok(clipboard_txt, coord_delimit);
+
+	while (token != NULL) {
+		if (entry_count > 3) {
+			break;
+		}
+
+		if (entry_count == 2) {
+			dot = strchr(token, '.');
+
+			if (dot == NULL) {
+				gtk_entry_set_text(paste_arg->entries[entry_count], token);
+				gtk_entry_set_text(paste_arg->entries[entry_count + 1], "000");
+				break;
+			} else {
+				idx = (int)(dot - token);
+
+				if (idx > 3) {
+					break;
+				}
+
+				strncpy(buf, token, idx);
+
+				gtk_entry_set_text(paste_arg->entries[entry_count], buf);
+				gtk_entry_set_text(paste_arg->entries[entry_count + 1], dot + 1);
+			}
+		}
+
+		gtk_entry_set_text(paste_arg->entries[entry_count++], token);
+
+		token = strtok (NULL, coord_delimit);
+	}
+}
+
 void on_window_main_destroy()
 {
 	gtk_main_quit();
@@ -408,6 +460,9 @@ int main(int argc, char *argv[])
 	about_dialog_argument_t about_dlg_userdata;
 	conv_start_argument_t conv_arg;
 	conv_stop_argument_t conv_stop_arg;
+
+	entry_cb_paste_t ra_entry_paste;
+	entry_cb_paste_t dec_entry_paste;
 
 	gtk_init(&argc, &argv);
 
@@ -493,6 +548,28 @@ int main(int argc, char *argv[])
 	g_signal_connect(button_stop, "clicked", G_CALLBACK (button_convert_stop_clicked_cb), &conv_stop_arg);
 
 	g_signal_connect(about_window, "response", G_CALLBACK (on_dialog_response), about_window);
+
+
+	ra_entry_paste.entries[0] = conv_arg.entry_ra_hour;
+	ra_entry_paste.entries[1] = conv_arg.entry_ra_min;
+	ra_entry_paste.entries[2] = conv_arg.entry_ra_sec;
+	ra_entry_paste.entries[3] = conv_arg.entry_ra_msec;
+
+	g_signal_connect_after(conv_arg.entry_ra_hour, "paste-clipboard", G_CALLBACK (on_coord_paste), &ra_entry_paste);
+	g_signal_connect_after(conv_arg.entry_ra_min, "paste-clipboard", G_CALLBACK (on_coord_paste), &ra_entry_paste);
+	g_signal_connect_after(conv_arg.entry_ra_sec, "paste-clipboard", G_CALLBACK (on_coord_paste), &ra_entry_paste);
+	g_signal_connect_after(conv_arg.entry_ra_msec, "paste-clipboard", G_CALLBACK (on_coord_paste), &ra_entry_paste);
+
+	dec_entry_paste.entries[0] = conv_arg.entry_dec_hour;
+	dec_entry_paste.entries[1] = conv_arg.entry_dec_min;
+	dec_entry_paste.entries[2] = conv_arg.entry_dec_sec;
+	dec_entry_paste.entries[3] = conv_arg.entry_dec_msec;
+
+	g_signal_connect_after(conv_arg.entry_dec_hour, "paste-clipboard", G_CALLBACK (on_coord_paste), &dec_entry_paste);
+	g_signal_connect_after(conv_arg.entry_dec_min, "paste-clipboard", G_CALLBACK (on_coord_paste), &dec_entry_paste);
+	g_signal_connect_after(conv_arg.entry_dec_sec, "paste-clipboard", G_CALLBACK (on_coord_paste), &dec_entry_paste);
+	g_signal_connect_after(conv_arg.entry_dec_msec, "paste-clipboard", G_CALLBACK (on_coord_paste), &dec_entry_paste);
+
 
 	about_dlg_userdata.main_window = GTK_WINDOW(window);
 	about_dlg_userdata.dlg = GTK_DIALOG(about_window);
