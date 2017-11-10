@@ -395,7 +395,12 @@ void on_coord_paste(GtkEntry *entry, gpointer arg)
 				strncpy(buf, token, idx);
 
 				gtk_entry_set_text(paste_arg->entries[entry_count], buf);
-				gtk_entry_set_text(paste_arg->entries[entry_count + 1], dot + 1);
+
+				if (idx != strlen(token) - 1) {
+					gtk_entry_set_text(paste_arg->entries[entry_count + 1], dot + 1);
+				} else {
+					gtk_entry_set_text(paste_arg->entries[entry_count + 1], "000");
+				}
 			}
 		}
 
