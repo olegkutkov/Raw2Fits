@@ -155,8 +155,8 @@ int write_fits_header(fitsfile *fptr, file_metadata_t *meta, char *add_comment)
 	char coord_buf[15];
 	char ver_str[21];
 
-	float ra = coordinates_to_deg(meta->ra.hour, meta->ra.min, meta->ra.sec, meta->ra.msec);
-	float dec = coordinates_to_deg(meta->dec.hour, meta->dec.min, meta->dec.sec, meta->dec.msec);
+	float ra = (float) coordinates_to_deg(meta->ra.hour, meta->ra.min, meta->ra.sec, meta->ra.msec, 1);
+	float dec = (float) coordinates_to_deg(meta->dec.hour, meta->dec.min, meta->dec.sec, meta->dec.msec, 0);
 
 	snprintf(ver_str, 21, "raw2fits %i.%i.%i"
 			, RAW2FITS_VERSION_MAJOR, RAW2FITS_VERSION_MINOR, RAW2FITS_VERSION_PATCH);

@@ -84,11 +84,16 @@ inline double frac(const double x)
 	return x - floor(x);
 }
 
-void deg_to_sexigesimal_str(float deg, char *dst)
+void deg_to_sexigesimal_str(float deg, char *dst, char hrs)
 {
 	char buf[15] = { 0 };	
 
 	int hour = (int) deg;
+
+	if (hrs) {
+		hour /= 15;
+	}
+
 	int min = (int) ((deg - hour) * 60);
 
 	double min_frac = (double)min / 60;
@@ -120,9 +125,13 @@ void deg_to_sexigesimal_str(float deg, char *dst)
 	free(saved_locale);
 }
 
-float coordinates_to_deg(short hour, short min, short sec, short msec)
+double coordinates_to_deg(short hour, short min, short sec, short msec, char hrs)
 {
-	float tmp = (hour > 0 ? hour : (hour * -1) ) + ((float)min) / 60 + ((float)sec + (float)msec / 1000) / 3600;
+	double tmp = (hour > 0 ? hour : (hour * -1) ) + ((double)min) / 60 + ((double)sec + (double)msec / 1000) / 3600;
+
+	if (hrs) {
+		tmp *= 15;
+	}
 
 	return (hour > 0 ? tmp : (tmp * -1));
 }
