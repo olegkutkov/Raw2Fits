@@ -20,9 +20,15 @@
 PROGRAM = raw2fits
 PROGRAM_CLI = raw2fits-cli
 
-PREFIX ?= /usr/
-BIN_PREFIX ?= $(PREFIX)/bin
-SHARE_PREFIX ?= $(PREFIX)/share
+prefix ?= /usr
+exec_prefix ?= $(prefix)
+bindir ?= $(exec_prefix)/bin
+datarootdir ?= $(prefix)/share
+datadir ?= $(datarootdir)
+
+INSTALL = install
+INSTALL_DATA = ${INSTALL} -m 644
+INSTALL_PROGRAM = $(INSTALL)
 
 DEBUG := -g -ggdb
 
@@ -59,30 +65,27 @@ cli: $(PROGRAM_CLI)
 $(PROGRAM_CLI): $(OBJ_COMMON) $(OBJ_CLI)
 
 install:
-	mkdir -p $(SHARE_PREFIX)/raw2fits/
-	mkdir -p $(SHARE_PREFIX)/applications/
-	mkdir -p $(SHARE_PREFIX)/pixmaps/
-	cp -f glade/ui.glade $(SHARE_PREFIX)/raw2fits/
-	cp -f desktop/raw2fits.desktop $(SHARE_PREFIX)/applications/
-	cp -f glade/raw2fits_48x48.png $(SHARE_PREFIX)/raw2fits/
-	cp -f glade/raw2fits_128x128.png $(SHARE_PREFIX)/raw2fits/
-	cp -f glade/raw2fits_48x48.png $(SHARE_PREFIX)/pixmaps/raw2fits.png
-	cp -f raw2fits $(BIN_PREFIX)
+	$(INSTALL_DATA) -D desktop/raw2fits.desktop $(DESTDIR)$(datadir)/applications/raw2fits.desktop
+	$(INSTALL_DATA) -D glade/raw2fits_128x128.png $(DESTDIR)$(datadir)/raw2fits/aw2fits_128x128.png
+	$(INSTALL_DATA) -D glade/raw2fits_48x48.png $(DESTDIR)$(datadir)/raw2fits/raw2fits_48x48.png
+	$(INSTALL_DATA) -D glade/ui.glade $(DESTDIR)$(datadir)/raw2fits/ui.glade
+	$(INSTALL_DATA) -D glade/raw2fits_48x48.png $(DESTDIR)$(datadir)/pixmaps/raw2fits.png
+	$(INSTALL_PROGRAM) -D raw2fits $(DESTDIR)$(bindir)
 
 uninstall:
-	rm -f $(BIN_PREFIX)/raw2fits
-	rm -f $(SHARE_PREFIX)/pixmaps/raw2fits.png
-	rm -f $(SHARE_PREFIX)/applications/raw2fits.desktop
-	rm -f $(SHARE_PREFIX)/raw2fits/raw2fits_48x48.png
-	rm -f $(SHARE_PREFIX)/raw2fits/raw2fits_128x128.png
-	rm -f $(SHARE_PREFIX)/raw2fits/ui.glade
-	rm -fr $(SHARE_PREFIX)/raw2fits/
+	rm -f $(DESTDIR)$(bindir)/raw2fits
+	rm -f $(DESTDIR)$(datadir)/pixmaps/raw2fits.png
+	rm -f $(DESTDIR)$(datadir)/applications/raw2fits.desktop
+	rm -f $(DESTDIR)$(datadir)/raw2fits/raw2fits_48x48.png
+	rm -f $(DESTDIR)$(datadir)/raw2fits/raw2fits_128x128.png
+	rm -f $(DESTDIR)$(datadir)/raw2fits/ui.glade
+	rm -fr $(DESTDIR)$(datadir)/raw2fits/
 
 install-cli:
-	cp -f raw2fits-cli $(BIN_PREFIX)
+	cp -f raw2fits-cli $(DESTDIR)$(bindir)
 
 uninstall-cli:
-	rm -f $(BIN_PREFIX)/raw2fits-cli
+	rm -f $(DESTDIR)$(bindir)/raw2fits-cli
 
 clean:
 	rm -f $(PROGRAM) $(PROGRAM_CLI) $(OBJ_COMMON) $(OBJ_GUI) $(OBJ_CLI)
