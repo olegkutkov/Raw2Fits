@@ -3,8 +3,7 @@ Raw2Fits
 Convert digital camera's RAW files to the scientific FITS format
 Console and GUI version.
 
-Author: Oleg Kutkov <elenbert@gmail.com>, 
-Crimean astrophysical observatory.
+Author: Oleg Kutkov <contact@olegkutkov.me>
 
 # Building and installation
 ```sh
