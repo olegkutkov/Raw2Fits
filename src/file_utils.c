@@ -37,9 +37,11 @@ static struct file_vendors all_vendors[9] =
 	{
 		"cr2", "Canon"
 	},
+#if (LIBRAW_COMPILE_CHECK_VERSION_NOTLESS(0,20))
 	{
 		"cr3", "Canon"
 	},
+#endif
 	{
 		"nef", "Nikon"
 	},
