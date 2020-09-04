@@ -31,3 +31,7 @@
  10 November 2017: version 0.4.3
 	- handle paste event on coord fields, parse pasted value and fill all coord entries with proper values
 
+****
+ 5 September 2020: version 0.4.4
+    - add support for Canon CR3
+
