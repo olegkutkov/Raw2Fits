@@ -329,6 +329,7 @@ void raw2fits(char *file, converter_params_t *arg)
 	rawdata->params.no_auto_bright = !arg->imsetup.apply_auto_bright;
 	rawdata->params.no_interpolation = !arg->imsetup.apply_interpolation;
 	rawdata->params.no_auto_scale = !arg->imsetup.apply_autoscale;
+	rawdata->params.output_bps = 16;
 #else
 	#pragma message ("LibRaw version is to old, unable to use image corrections")
 #endif

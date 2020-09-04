@@ -38,6 +38,9 @@ static struct file_vendors all_vendors[9] =
 		"cr2", "Canon"
 	},
 	{
+		"cr3", "Canon"
+	},
+	{
 		"nef", "Nikon"
 	},
 	{
