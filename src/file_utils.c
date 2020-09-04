@@ -25,6 +25,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <libgen.h>
+#include <libraw/libraw.h>
 #include "file_utils.h"
 
 struct file_vendors {
@@ -32,7 +33,7 @@ struct file_vendors {
 	char vendor[25];
 };
 
-static struct file_vendors all_vendors[9] =
+static struct file_vendors all_vendors[] =
 {
 	{
 		"cr2", "Canon"
@@ -91,7 +92,7 @@ void get_file_info(char *fname, file_info_t *finf)
 
 	char *file_extension = extdot + 1;
 
-	for (vc = 0; vc < 9; vc++) {
+	for (vc = 0; vc < (sizeof(all_vendors) / sizeof(struct file_vendors)); ++vc) {
 		if (strstr(file_extension, all_vendors[vc].extensions) != NULL) {
 			finf->file_supported = 1;
 			strcpy(finf->file_vendor, all_vendors[vc].vendor);
