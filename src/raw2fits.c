@@ -205,15 +205,16 @@ int write_fits_header(fitsfile *fptr, file_metadata_t *meta, char *add_comment)
 	return status;
 }
 
-void copy_image_buf(FRAME_MODE mode, libraw_processed_image_t *proc_img, long **dst)
+void copy_image_buf(FRAME_MODE mode, libraw_processed_image_t *proc_img, uint16_t **dst)
 {
 	int i, k = 0;
-	long rgb[3];
+	uint16_t rgb[3];
+	uint16_t *image = (ushort *)proc_img->data;
 
 	for (i = 0; i < proc_img->width * proc_img->height; i++) {
-		rgb[0] = proc_img->data[k];
-		rgb[1] = proc_img->data[k + 1];
-		rgb[2] = proc_img->data[k + 2];
+		rgb[0] = (ushort)image[k];
+		rgb[1] = (ushort)image[k + 1];
+		rgb[2] = (ushort)image[k + 2];
 
 		switch (mode) {
 			case GRAYSCALE:
@@ -240,12 +241,12 @@ void copy_image_buf(FRAME_MODE mode, libraw_processed_image_t *proc_img, long **
 	}
 }
 
-int write_fits_image(fitsfile *fptr, long *frame, int width, int height)
+int write_fits_image(fitsfile *fptr, uint16_t *frame, int width, int height)
 {
 	int status = 0;
 	long fpx[2] = { 1L, 1L };
 
-	fits_write_pix(fptr, TLONG, fpx, width * height, frame, &status);
+	fits_write_pix(fptr, TUSHORT, fpx, width * height, frame, &status);
 
 	return status;
 }
@@ -258,7 +259,7 @@ void raw2fits(char *file, converter_params_t *arg)
 	char target_filename[512] = { 0 };
 	size_t target_filename_len;
 	fitsfile *fits;
-	long *framebuf;
+	uint16_t *framebuf;
 	int i, err;
 	int target_file_exists = 0;
 
@@ -291,6 +292,20 @@ void raw2fits(char *file, converter_params_t *arg)
 
 	make_target_fits_filename(arg, file, target_filename, FILENAME_CHANNEL_POSTFIX[arg->imsetup.mode]);
 
+	switch (rawdata->sizes.flip) {
+		case 0:
+			rawdata->params.user_flip = 2;
+			break;
+
+		case 5:
+			rawdata->params.user_flip = 4;
+			break;
+
+		case 6:
+			rawdata->params.user_flip = 7;
+			break;
+	};
+
 	target_file_exists = is_file_exist(target_filename);
 
 	if (arg->imsetup.mode != ALL_CHANNELS_BY_FILES)
@@ -316,20 +331,24 @@ void raw2fits(char *file, converter_params_t *arg)
 
 	arg->logger_msg(arg->logger_arg, "\tConverting raw image using %s\n", decoder_info.decoder_name);
 
-	err = libraw_raw2image(rawdata);
-
-	if (err != LIBRAW_SUCCESS) {
-		print_error(arg, "Failed to extract image", err);
-		libraw_recycle(rawdata);
-		libraw_close(rawdata);
-		return;
-	}
-
+	rawdata->params.output_bps = 16;
 #if (LIBRAW_COMPILE_CHECK_VERSION_NOTLESS(0,17))
 	rawdata->params.no_auto_bright = !arg->imsetup.apply_auto_bright;
 	rawdata->params.no_interpolation = !arg->imsetup.apply_interpolation;
 	rawdata->params.no_auto_scale = !arg->imsetup.apply_autoscale;
-	rawdata->params.output_bps = 16;
+	rawdata->params.user_qual = 11; // Use 1 or 11 for best results
+	rawdata->params.use_auto_wb = 0;
+	rawdata->params.use_camera_wb = 0;
+	rawdata->params.adjust_maximum_thr = 0.0;
+	rawdata->params.half_size = 0;
+	rawdata->params.gamm[0] = 1.0;	// We want linear for image combos
+	rawdata->params.gamm[1] = 1.0;	// We want linear for image combos
+	rawdata->params.use_camera_matrix = 0; // use camera matrix
+	rawdata->params.user_mul[0] = 1.00;
+	rawdata->params.user_mul[1] = 1.00;
+	rawdata->params.user_mul[2] = 1.00;
+	rawdata->params.user_mul[3] = 1.00;
+	rawdata->params.output_color = 0; // Disable color output
 #else
 	#pragma message ("LibRaw version is to old, unable to use image corrections")
 #endif
@@ -365,7 +384,7 @@ void raw2fits(char *file, converter_params_t *arg)
 	arg->meta.width = proc_img->width;
 	arg->meta.height = proc_img->height;
 
-	framebuf = (long *) malloc(proc_img->width * proc_img->height * sizeof(long));
+	framebuf = (uint16_t *) malloc(proc_img->width * proc_img->height * sizeof(uint16_t));
 
 	if (!framebuf) {
 		arg->logger_msg(arg->logger_arg, "Failed to allocate memory for the frame, err: \n", strerror(err));
