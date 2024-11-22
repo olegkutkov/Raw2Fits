@@ -52,7 +52,7 @@ void show_help()
 {
 	printf("raw2fits, version: %i.%i.%i\n"
 			, RAW2FITS_VERSION_MAJOR, RAW2FITS_VERSION_MINOR, RAW2FITS_VERSION_PATCH);
-	printf("Oleg Kutkov <elenbert@gmail.com>\nCrimean astrophysical observatory, 2017\n\n");
+	printf("Oleg Kutkov <contact@olegkutkov.me>\n\n");
 
 	printf("\t-h, --help\t\tShow this help and exit\n");
 	printf("\t-q, --quiet\t\tReduce ouptut messages\n");
