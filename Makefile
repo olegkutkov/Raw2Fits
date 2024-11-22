@@ -70,7 +70,7 @@ install:
 	$(INSTALL_DATA) -D glade/raw2fits_48x48.png $(DESTDIR)$(datadir)/raw2fits/raw2fits_48x48.png
 	$(INSTALL_DATA) -D glade/ui.glade $(DESTDIR)$(datadir)/raw2fits/ui.glade
 	$(INSTALL_DATA) -D glade/raw2fits_48x48.png $(DESTDIR)$(datadir)/pixmaps/raw2fits.png
-	$(INSTALL_PROGRAM) -D raw2fits $(DESTDIR)$(bindir)
+	$(INSTALL_PROGRAM) -D raw2fits $(DESTDIR)$(bindir)/raw2fits
 
 uninstall:
 	rm -f $(DESTDIR)$(bindir)/raw2fits
@@ -82,7 +82,7 @@ uninstall:
 	rm -fr $(DESTDIR)$(datadir)/raw2fits/
 
 install-cli:
-	cp -f raw2fits-cli $(DESTDIR)$(bindir)
+	cp -f raw2fits-cli $(DESTDIR)$(bindir)/raw2fits-cli
 
 uninstall-cli:
 	rm -f $(DESTDIR)$(bindir)/raw2fits-cli
