@@ -1,0 +1,15 @@
+Source: raw2fits
+Section: Education
+Priority: optional
+Maintainer: Oleg Kutkov <contact@olegkutkov.me>
+Build-Depends: debhelper-compat (= 13), libraw-dev, libcfitsio-dev, libconfig-dev, libgtk-3-dev
+Standards-Version: 4.6.0
+Homepage: olegkutkov.me
+#Vcs-Browser: https://salsa.debian.org/debian/raw2fits
+#Vcs-Git: https://salsa.debian.org/debian/raw2fits.git
+Rules-Requires-Root: no
+
+Package: raw2fits
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Eeasy to use DSLR RAW to scientific FITS files converter

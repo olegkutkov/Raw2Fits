@@ -1,0 +1,5 @@
+raw2fits (0.5-1) UNRELEASED; urgency=medium
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- Oleg Kutkov <contact@olegkutkov.me>  Sat, 23 Nov 2024 00:10:30 +0200
