@@ -7,5 +7,5 @@ Comment=Convert DSLR RAW images to the sciense FITS format
 Exec=raw2fits
 Icon=raw2fits.png
 Terminal=false
-Categories=Graphics;GTK;
+Categories=Education
 
