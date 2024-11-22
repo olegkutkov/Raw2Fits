@@ -20,8 +20,7 @@
     <property name="program_name">Raw2Fits</property>
     <property name="version">0.2</property>
     <property name="copyright" translatable="yes">
-Kutkov Oleg, 2017
-Crimean astrophysical observatory
+Oleg Kutkov, 2024
 </property>
     <property name="comments" translatable="yes">Raw to Fits files converter 
 for Canon/Nikon/Sony/Fuji cameras</property>
