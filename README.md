@@ -10,6 +10,17 @@ Author: Oleg Kutkov <contact@olegkutkov.me>
 $ git clone https://github.com/olegkutkov/Raw2Fits.git
 $ cd Raw2Fits
 ```
+
+## Install dependencies
+### Ubuntu/Debian:
+```
+sudo apt-get install libraw-dev libcfitsio-dev libconfig-dev libgtk-3-dev
+```
+### Fedora:
+```
+sudo yum install gcc LibRaw-devel libconfig-devel cfitsio-devel gtk3-devel
+```
+
 ## GUI version
 ```sh
 $ make
@@ -23,23 +34,6 @@ $ sudo make install-cli
 ```
 
 Raw to Fits application should appear in your DE applications menu
-# Dependencies
-
-### LibRaw 
-Library for reading RAW files obtained from digital photo cameras.
-It's highly recommended to use latest stable version of the library instead of your distro version.
-Versions older than 0.17 may not correctly extract exif (exposure, date/time, camera's owner) information from raw files.
-You can always get actual version from the official website: https://www.libraw.org/download
-
-### cfitsio
-Library of C and Fortran subroutines for reading and writing data files in FITS.
-You can always get actual version from the official website: https://heasarc.gsfc.nasa.gov/fitsio/fitsio.html
-
-### libgtk-3 (GUI version only)
-Install any version available in your distribution
-
-### libconfig (Console version only)
-Install any version available in your distribution
 
 
 # Supported cameras
